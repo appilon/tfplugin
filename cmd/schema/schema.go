@@ -107,7 +107,7 @@ func (c *command) Run(args []string) int {
 		return 1
 	}
 
-	cmd := exec.Command("go", "run", "dumper.go")
+	cmd := exec.Command("go", "run", "-tags", "'exporter'", "dumper.go")
 	cmd.Dir = fullPath
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout

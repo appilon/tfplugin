@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 
+	"github.com/appilon/tfdev/instrumentation"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -28,15 +29,15 @@ func NewProviderDump(providerFunc func() terraform.ResourceProvider) *ProviderDu
 	p := &ProviderDump{}
 	p.Schema = make(map[string]*SchemaDump)
 	for key, value := range i.Schema {
-		p.Schema[key] = NewSchemaDump(value)
+		p.Schema[key] = NewSchemaDump(value, "[provider]."+key+".")
 	}
 	p.DataSourcesMap = make(map[string]*ResourceDump)
 	for key, value := range i.DataSourcesMap {
-		p.DataSourcesMap[key] = NewResourceDump(value)
+		p.DataSourcesMap[key] = NewResourceDump(value, "[datasource]."+key+".")
 	}
 	p.ResourcesMap = make(map[string]*ResourceDump)
 	for key, value := range i.ResourcesMap {
-		p.ResourcesMap[key] = NewResourceDump(value)
+		p.ResourcesMap[key] = NewResourceDump(value, "[resource]."+key+".")
 	}
 	return p
 }
@@ -51,14 +52,14 @@ type ResourceDump struct {
 }
 
 // Converts terraform/helper/schema.Resource to ResourceDump
-func NewResourceDump(i *schema.Resource) *ResourceDump {
+func NewResourceDump(i *schema.Resource, helperKeyPrefix string) *ResourceDump {
 	r := &ResourceDump{}
 	r.SchemaVersion = i.SchemaVersion
 	r.DeprecationMessage = i.DeprecationMessage
 	r.Timeouts = i.Timeouts
 	r.Schema = make(map[string]*SchemaDump)
 	for key, value := range i.Schema {
-		r.Schema[key] = NewSchemaDump(value)
+		r.Schema[key] = NewSchemaDump(value, helperKeyPrefix+key+".")
 	}
 	return r
 }
@@ -66,27 +67,29 @@ func NewResourceDump(i *schema.Resource) *ResourceDump {
 // Copypaste of schema.Schema but removes functions or anything else
 // that will fail to serialize
 type SchemaDump struct {
-	Type          schema.ValueType
-	Optional      bool
-	Required      bool
-	Default       interface{}
-	Description   string
-	InputDefault  string
-	Computed      bool
-	ForceNew      bool
-	Elem          interface{}
-	MaxItems      int
-	MinItems      int
-	PromoteSingle bool
-	ComputedWhen  []string
-	ConflictsWith []string
-	Deprecated    string
-	Removed       string
-	Sensitive     bool
+	Type             schema.ValueType
+	Optional         bool
+	Required         bool
+	Default          interface{}
+	Description      string
+	InputDefault     string
+	Computed         bool
+	ForceNew         bool
+	Elem             interface{}
+	MaxItems         int
+	MinItems         int
+	PromoteSingle    bool
+	ComputedWhen     []string
+	ConflictsWith    []string
+	Deprecated       string
+	Removed          string
+	Sensitive        bool
+	DefaultFuncInfo  *instrumentation.HelperInfo
+	ValidateFuncInfo *instrumentation.HelperInfo
 }
 
 // Converts terraform/helper/schema.Schema to SchemaDump
-func NewSchemaDump(i *schema.Schema) *SchemaDump {
+func NewSchemaDump(i *schema.Schema, helperKeyPrefix string) *SchemaDump {
 	s := &SchemaDump{}
 	s.Type = i.Type
 	s.Optional = i.Optional
@@ -106,10 +109,18 @@ func NewSchemaDump(i *schema.Schema) *SchemaDump {
 	s.Sensitive = i.Sensitive
 	if i.Elem != nil {
 		if nestedSchema, ok := i.Elem.(*schema.Schema); ok {
-			s.Elem = NewSchemaDump(nestedSchema)
+			s.Elem = NewSchemaDump(nestedSchema, helperKeyPrefix+"elem.")
 		} else if nestedResource, ok := i.Elem.(*schema.Resource); ok {
-			s.Elem = NewResourceDump(nestedResource)
+			s.Elem = NewResourceDump(nestedResource, helperKeyPrefix+"elem.")
 		}
+	}
+	if i.DefaultFunc != nil {
+		k := helperKeyPrefix + "DefaultFunc"
+		s.DefaultFuncInfo = instrumentation.HelperInfoMap[k]
+	}
+	if i.ValidateFunc != nil {
+		k := helperKeyPrefix + "ValidateFunc"
+		s.ValidateFuncInfo = instrumentation.HelperInfoMap[k]
 	}
 	return s
 }
