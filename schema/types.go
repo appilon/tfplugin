@@ -1,6 +1,12 @@
 package schema
 
-import "github.com/hashicorp/terraform/helper/schema"
+import (
+	"encoding/json"
+	"io"
+
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/terraform"
+)
 
 // Copypaste of schema.Provider but removes functions or anything else
 // that will fail to serialize
@@ -10,8 +16,15 @@ type ProviderDump struct {
 	DataSourcesMap map[string]*ResourceDump
 }
 
+func (p *ProviderDump) ToJSON(w io.Writer) error {
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "    ")
+	return enc.Encode(p)
+}
+
 // Converts terraform/helper/schema.Provider to ProviderDump
-func NewProviderDump(i *schema.Provider) *ProviderDump {
+func NewProviderDump(providerFunc func() terraform.ResourceProvider) *ProviderDump {
+	i := providerFunc().(*schema.Provider)
 	p := &ProviderDump{}
 	p.Schema = make(map[string]*SchemaDump)
 	for key, value := range i.Schema {
