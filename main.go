@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/appilon/tfdev/cmd/docs"
-	"github.com/appilon/tfdev/cmd/schema"
+	"github.com/appilon/tfplugin/cmd/docs"
+	"github.com/appilon/tfplugin/cmd/schema"
 	"github.com/mitchellh/cli"
 )
 

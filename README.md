@@ -1,5 +1,5 @@
 # TFPLUGIN
-Swiss army knife tool for Terraform and plugin development
+Swiss army knife tool for Terraform Plugin development
 
 ## Installation
 ```

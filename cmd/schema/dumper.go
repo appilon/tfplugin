@@ -6,7 +6,7 @@ package main
 import (
 	"log"
 	"os"
-	"github.com/appilon/tfdev/schema"
+	"github.com/appilon/tfplugin/schema"
 	p "%s/%s"
 )
 

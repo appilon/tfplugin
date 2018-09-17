@@ -4,7 +4,7 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/appilon/tfdev/schema"
+	"github.com/appilon/tfplugin/schema"
 )
 
 var tmpl = `

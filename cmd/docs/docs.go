@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/appilon/tfdev/schema"
+	"github.com/appilon/tfplugin/schema"
 	"github.com/mitchellh/cli"
 )
 
