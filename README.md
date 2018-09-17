@@ -1,14 +1,14 @@
-# TFDEV
+# TFPLUGIN
 Swiss army knife tool for Terraform and plugin development
 
 ## Installation
 ```
-$ go get -u github.com/appilon/tfdev
+$ go get -u github.com/appilon/tfplugin
 ```
 
 ## Schema Extraction
 ```
-$ tfdev schema github.com/mitchellh/terraform-provider-netlify > provider.json
+$ tfplugin schema github.com/mitchellh/terraform-provider-netlify > provider.json
 ```
 
 ### Requirements
@@ -19,7 +19,7 @@ $ tfdev schema github.com/mitchellh/terraform-provider-netlify > provider.json
 
 ## Documentation Generation
 ```
-$ cat provider.json | tfdev docs -resource=netlify_hook
+$ cat provider.json | tfplugin docs -resource=netlify_hook
 ```
 
 The doc generation is very much still a work in progress.
