@@ -1,0 +1,85 @@
+{
+	"comment": "",
+	"ignore": "",
+	"package": [
+		{
+			"checksumSHA1": "4uwaiaf6MH/ZGBYNYoAddVajhYw=",
+			"path": "github.com/armon/go-radix",
+			"revision": "1a2de0c21c94309923825da3df33a4381872c795",
+			"revisionTime": "2018-08-24T02:57:28Z"
+		},
+		{
+			"checksumSHA1": "oTmBS67uxM6OXB/+OJUAG9LK4jw=",
+			"path": "github.com/bgentry/speakeasy",
+			"revision": "4aabc24848ce5fd31929f7d1e4ea74d3709c14cd",
+			"revisionTime": "2017-04-17T20:07:03Z"
+		},
+		{
+			"checksumSHA1": "SY56fjHVAKJngn3PrmkNeMDazfk=",
+			"path": "github.com/fatih/color",
+			"revision": "3f9d52f7176a6927daacff70a3e8d1dc2025c53e",
+			"revisionTime": "2018-10-10T23:13:11Z"
+		},
+		{
+			"checksumSHA1": "eYnbfj9EZWjaUg06kU9gF4C0vDU=",
+			"path": "github.com/hashicorp/errwrap",
+			"revision": "8a6fb523712970c966eefc6b39ed2c5e74880354",
+			"revisionTime": "2018-08-24T00:39:10Z"
+		},
+		{
+			"checksumSHA1": "FLRJdKwV/01yXewm5NCwSSTyC9Q=",
+			"path": "github.com/hashicorp/go-multierror",
+			"revision": "886a7fbe3eb1c874d46f623bfa70af45f425b3d1",
+			"revisionTime": "2018-08-24T00:40:42Z"
+		},
+		{
+			"checksumSHA1": "lP2oAmh6mEONIorMM8tD8ntqO7c=",
+			"path": "github.com/mattn/go-colorable",
+			"revision": "efa589957cd060542a26d2dd7832fd6a6c6c3ade",
+			"revisionTime": "2018-03-10T13:32:14Z"
+		},
+		{
+			"checksumSHA1": "y2mv5OWDl8+NEjhlJOWuVzw6tzs=",
+			"path": "github.com/mattn/go-isatty",
+			"revision": "3fb116b820352b7f0c281308a4d6250c22d94e27",
+			"revisionTime": "2018-08-30T10:17:45Z"
+		},
+		{
+			"checksumSHA1": "rl4e/tOaZ52WxMdUyyoAb4T2a1U=",
+			"path": "github.com/mitchellh/cli",
+			"revision": "3d22a244be8aa6fb16ac24af0e195c08b7d973aa",
+			"revisionTime": "2018-08-24T00:41:14Z"
+		},
+		{
+			"checksumSHA1": "r5JeIR6baeDd4lgdeBWOUxgY0dc=",
+			"path": "github.com/posener/complete",
+			"revision": "3ef9b31a6a0613ae832e7ecf208374027c3b2343",
+			"revisionTime": "2018-10-26T10:48:32Z"
+		},
+		{
+			"checksumSHA1": "tTZdbCXe+5kV35vEhVIJVD4kh8Q=",
+			"path": "github.com/posener/complete/cmd",
+			"revision": "3ef9b31a6a0613ae832e7ecf208374027c3b2343",
+			"revisionTime": "2018-10-26T10:48:32Z"
+		},
+		{
+			"checksumSHA1": "vCp4iBIA04hfRVcefkNLnXPc29M=",
+			"path": "github.com/posener/complete/cmd/install",
+			"revision": "3ef9b31a6a0613ae832e7ecf208374027c3b2343",
+			"revisionTime": "2018-10-26T10:48:32Z"
+		},
+		{
+			"checksumSHA1": "UPNISF4XBuQODfAluijTorhok1A=",
+			"path": "github.com/posener/complete/match",
+			"revision": "3ef9b31a6a0613ae832e7ecf208374027c3b2343",
+			"revisionTime": "2018-10-26T10:48:32Z"
+		},
+		{
+			"checksumSHA1": "/sYBBDOE+WBqsYXL85WNPOvbcbw=",
+			"path": "golang.org/x/sys/unix",
+			"revision": "3a76605856fddce5718553cbb8bd50ca492a7274",
+			"revisionTime": "2018-11-06T12:15:40Z"
+		}
+	],
+	"rootPath": "github.com/appilon/tfplugin"
+}
