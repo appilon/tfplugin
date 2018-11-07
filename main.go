@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	c := cli.NewCLI("tfdev", "0.1.0")
+	c := cli.NewCLI("tfplugin", "0.1.0")
 	c.Args = os.Args[1:]
 	c.Commands = map[string]cli.CommandFactory{
 		"schema": schema.CommandFactory,
