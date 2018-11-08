@@ -33,6 +33,12 @@
 			"revisionTime": "2018-08-24T00:40:42Z"
 		},
 		{
+			"checksumSHA1": "jhSXTSWJKvdAAKKkbAi5c1m6dr8=",
+			"path": "github.com/hashicorp/go-version",
+			"revision": "b5a281d3160aa11950a6182bd9a9dc2cb1e02d50",
+			"revisionTime": "2018-08-24T00:43:55Z"
+		},
+		{
 			"checksumSHA1": "lP2oAmh6mEONIorMM8tD8ntqO7c=",
 			"path": "github.com/mattn/go-colorable",
 			"revision": "efa589957cd060542a26d2dd7832fd6a6c6c3ade",

@@ -1,7 +1,6 @@
 package schema
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -9,8 +8,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/appilon/tfplugin/cmd"
 	"github.com/mitchellh/cli"
 )
+
+const CommandName = "schema"
 
 type command struct{}
 
@@ -24,31 +26,6 @@ func (c *command) Synopsis() string {
 
 func CommandFactory() (cli.Command, error) {
 	return &command{}, nil
-}
-
-func findProviderInGoPath(providerPath string) (string, error) {
-	gopath := os.Getenv("GOPATH")
-	if gopath == "" {
-		errors.New("GOPATH is empty")
-	}
-	gopaths := filepath.SplitList(gopath)
-
-	for _, p := range gopaths {
-		fullPath := filepath.Join(p, "src", providerPath)
-		info, err := os.Stat(fullPath)
-
-		if err == nil {
-			if !info.IsDir() {
-				return "", fmt.Errorf("%s is not a directory", fullPath)
-			} else {
-				return fullPath, nil
-			}
-		} else if !os.IsNotExist(err) {
-			return "", err
-		}
-	}
-
-	return "", fmt.Errorf("Could not find %s in GOPATH: %s", providerPath, gopath)
 }
 
 func getPackageName(providerPath string) (string, error) {
@@ -84,7 +61,7 @@ func (c *command) Run(args []string) int {
 	}
 
 	providerPath := args[0]
-	fullPath, err := findProviderInGoPath(providerPath)
+	fullPath, err := cmd.FindProviderInGoPath(providerPath)
 	if err != nil {
 		log.Printf("Error finding provider: %s", err)
 		return 1
