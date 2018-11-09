@@ -7,7 +7,11 @@ import (
 	"path/filepath"
 )
 
-func FindProviderInGoPath(providerPath string) (string, error) {
+func FindProvider(providerPath string) (string, error) {
+	if providerPath == "" {
+		return os.Getwd()
+	}
+
 	gopath := os.Getenv("GOPATH")
 	if gopath == "" {
 		errors.New("GOPATH is empty")

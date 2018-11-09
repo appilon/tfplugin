@@ -7,6 +7,7 @@ import (
 	"github.com/appilon/tfplugin/cmd/docs"
 	"github.com/appilon/tfplugin/cmd/schema"
 	"github.com/appilon/tfplugin/cmd/upgrade/golang"
+	"github.com/appilon/tfplugin/cmd/upgrade/pr"
 	"github.com/mitchellh/cli"
 )
 
@@ -17,6 +18,7 @@ func main() {
 		schema.CommandName: schema.CommandFactory,
 		docs.CommandName:   docs.CommandFactory,
 		golang.CommandName: golang.CommandFactory,
+		pr.CommandName:     pr.CommandFactory,
 	}
 
 	exitStatus, err := c.Run()

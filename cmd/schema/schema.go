@@ -56,18 +56,17 @@ func moveVendoredTerraform(path string, undo bool) (bool, error) {
 }
 
 func (c *command) Run(args []string) int {
-	if len(args) != 1 {
-		return cli.RunResultHelp
+	var providerPath string
+	if len(args) > 0 {
+		providerPath = args[0]
 	}
-
-	providerPath := args[0]
-	fullPath, err := cmd.FindProviderInGoPath(providerPath)
+	fullPath, err := cmd.FindProvider(providerPath)
 	if err != nil {
 		log.Printf("Error finding provider: %s", err)
 		return 1
 	}
 
-	packageName, err := getPackageName(providerPath)
+	packageName, err := getPackageName(fullPath)
 	if err != nil {
 		log.Printf("Error determining package exporting provider: %s", err)
 		return 1

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
 	"path"
 	"runtime"
 	"strings"
@@ -35,7 +34,6 @@ func CommandFactory() (cli.Command, error) {
 func (c *command) Run(args []string) int {
 	flags := flag.NewFlagSet(CommandName, flag.ExitOnError)
 	var err error
-
 	var fromStr string
 	var toStr string
 	var providerPath string
@@ -61,19 +59,10 @@ func (c *command) Run(args []string) int {
 		return 1
 	}
 
-	if providerPath == "" {
-		providerPath, err = os.Getwd()
-		if err != nil {
-			log.Printf("Error getting working directory: %s", err)
-			return 1
-		}
-	} else {
-		provider := providerPath
-		providerPath, err = cmd.FindProviderInGoPath(provider)
-		if err != nil {
-			log.Printf("Error finding %s in GOPATH: %s", provider, err)
-			return 1
-		}
+	providerPath, err = cmd.FindProvider(providerPath)
+	if err != nil {
+		log.Printf("Error finding provider: %s", err)
+		return 1
 	}
 
 	if err = updateTravis(providerPath, to.String()); err != nil {
