@@ -40,6 +40,7 @@ func (c *command) Run(args []string) int {
 	var message string
 	var remote string
 	var open bool
+	var openBrowser bool
 	var base string
 	var user string
 	var title string
@@ -52,6 +53,7 @@ func (c *command) Run(args []string) int {
 	flags.StringVar(&user, "user", "", "github user/org for cross account pull requests")
 	flags.StringVar(&title, "title", "sdk upgrade", "title of the pull request")
 	flags.BoolVar(&open, "open", false, "open pull request automatically, requires GITHUB_PERSONAL_TOKEN")
+	flags.BoolVar(&openBrowser, "browser", false, "open created pull request in browser")
 	flags.Parse(args)
 
 	providerPath, err := cmd.FindProvider(provider)
@@ -81,7 +83,7 @@ func (c *command) Run(args []string) int {
 	}
 
 	if open {
-		if err = openPullRequest(providerPath, base, branch, user, title); err != nil {
+		if err = openPullRequest(providerPath, base, branch, user, title, openBrowser); err != nil {
 			log.Printf("Error opening pull request: %s", err)
 			return 1
 		}
@@ -99,7 +101,7 @@ func run(dir, name string, arg ...string) error {
 	return cmd.Run()
 }
 
-func openPullRequest(providerPath, base, head, user, title string) error {
+func openPullRequest(providerPath, base, head, user, title string, openBrowser bool) error {
 	token := os.Getenv("GITHUB_PERSONAL_TOKEN")
 	if token == "" {
 		return errors.New("No GITHUB_PERSONAL_TOKEN set")
@@ -130,7 +132,11 @@ func openPullRequest(providerPath, base, head, user, title string) error {
 		return err
 	}
 	fmt.Printf("\nPull request created, view at: %s\n", pr.GetHTMLURL())
-	return browser.OpenURL(pr.GetHTMLURL())
+
+	if openBrowser {
+		err = browser.OpenURL(pr.GetHTMLURL())
+	}
+	return err
 }
 
 func getGitHubDetails(providerPath string) (string, string, error) {
