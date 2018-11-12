@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/appilon/tfplugin/util"
 	"github.com/mitchellh/cli"
@@ -90,5 +91,11 @@ func updateSDK(providerPath, version, depTool string) error {
 }
 
 func modulesEnv() []string {
-	return append(os.Environ(), "GO11MODULE=on")
+	var env []string
+	for _, pair := range os.Environ() {
+		if !strings.HasPrefix(pair, "GOPATH") {
+			env = append(env, pair)
+		}
+	}
+	return append(env, "GO11MODULE=on")
 }
