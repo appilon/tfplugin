@@ -10,9 +10,9 @@ import (
 	"github.com/mitchellh/cli"
 )
 
-type command struct {
-	name string
-}
+const CommandName = "docs"
+
+type command struct{}
 
 func (c *command) Help() string {
 	return ""
@@ -23,13 +23,11 @@ func (c *command) Synopsis() string {
 }
 
 func CommandFactory() (cli.Command, error) {
-	return &command{
-		name: "docs",
-	}, nil
+	return &command{}, nil
 }
 
 func (c *command) Run(args []string) int {
-	flags := flag.NewFlagSet(c.name, flag.ExitOnError)
+	flags := flag.NewFlagSet(CommandName, flag.ExitOnError)
 	var datasource string
 	var resource string
 	flags.StringVar(&datasource, "datasource", "", "data source name")

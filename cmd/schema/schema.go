@@ -1,16 +1,17 @@
 package schema
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
+	"github.com/appilon/tfplugin/util"
 	"github.com/mitchellh/cli"
 )
+
+const CommandName = "schema"
 
 type command struct{}
 
@@ -24,31 +25,6 @@ func (c *command) Synopsis() string {
 
 func CommandFactory() (cli.Command, error) {
 	return &command{}, nil
-}
-
-func findProviderInGoPath(providerPath string) (string, error) {
-	gopath := os.Getenv("GOPATH")
-	if gopath == "" {
-		errors.New("GOPATH is empty")
-	}
-	gopaths := filepath.SplitList(gopath)
-
-	for _, p := range gopaths {
-		fullPath := filepath.Join(p, "src", providerPath)
-		info, err := os.Stat(fullPath)
-
-		if err == nil {
-			if !info.IsDir() {
-				return "", fmt.Errorf("%s is not a directory", fullPath)
-			} else {
-				return fullPath, nil
-			}
-		} else if !os.IsNotExist(err) {
-			return "", err
-		}
-	}
-
-	return "", fmt.Errorf("Could not find %s in GOPATH: %s", providerPath, gopath)
 }
 
 func getPackageName(providerPath string) (string, error) {
@@ -79,18 +55,17 @@ func moveVendoredTerraform(path string, undo bool) (bool, error) {
 }
 
 func (c *command) Run(args []string) int {
-	if len(args) != 1 {
-		return cli.RunResultHelp
+	var providerPath string
+	if len(args) > 0 {
+		providerPath = args[0]
 	}
-
-	providerPath := args[0]
-	fullPath, err := findProviderInGoPath(providerPath)
+	fullPath, err := util.FindProvider(providerPath)
 	if err != nil {
 		log.Printf("Error finding provider: %s", err)
 		return 1
 	}
 
-	packageName, err := getPackageName(providerPath)
+	packageName, err := getPackageName(fullPath)
 	if err != nil {
 		log.Printf("Error determining package exporting provider: %s", err)
 		return 1
@@ -107,11 +82,6 @@ func (c *command) Run(args []string) int {
 		return 1
 	}
 
-	cmd := exec.Command("go", "run", "dumper.go")
-	cmd.Dir = fullPath
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-
 	// sigh, golang vendoring woes
 	moved, err := moveVendoredTerraform(fullPath, false)
 	if err != nil {
@@ -122,7 +92,7 @@ func (c *command) Run(args []string) int {
 	// going forward errors don't exit right away, attempt cleanup
 	var status int
 
-	if err = cmd.Run(); err != nil {
+	if err = util.Run(os.Environ(), fullPath, "go", "run", "dumper.go"); err != nil {
 		log.Printf("go run dumper.go exited with error: %s", err)
 		status = 1
 	}
