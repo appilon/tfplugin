@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/appilon/tfplugin/cmd"
+	"github.com/appilon/tfplugin/util"
 	version "github.com/hashicorp/go-version"
 	"github.com/mitchellh/cli"
 )
@@ -59,7 +59,7 @@ func (c *command) Run(args []string) int {
 		return 1
 	}
 
-	providerPath, err = cmd.FindProvider(providerPath)
+	providerPath, err = util.FindProvider(providerPath)
 	if err != nil {
 		log.Printf("Error finding provider: %s", err)
 		return 1

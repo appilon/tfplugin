@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
-	"github.com/appilon/tfplugin/cmd"
+	"github.com/appilon/tfplugin/util"
 	"github.com/mitchellh/cli"
 )
 
@@ -60,7 +59,7 @@ func (c *command) Run(args []string) int {
 	if len(args) > 0 {
 		providerPath = args[0]
 	}
-	fullPath, err := cmd.FindProvider(providerPath)
+	fullPath, err := util.FindProvider(providerPath)
 	if err != nil {
 		log.Printf("Error finding provider: %s", err)
 		return 1
@@ -83,11 +82,6 @@ func (c *command) Run(args []string) int {
 		return 1
 	}
 
-	cmd := exec.Command("go", "run", "dumper.go")
-	cmd.Dir = fullPath
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-
 	// sigh, golang vendoring woes
 	moved, err := moveVendoredTerraform(fullPath, false)
 	if err != nil {
@@ -98,7 +92,7 @@ func (c *command) Run(args []string) int {
 	// going forward errors don't exit right away, attempt cleanup
 	var status int
 
-	if err = cmd.Run(); err != nil {
+	if err = util.Run(fullPath, "go", "run", "dumper.go"); err != nil {
 		log.Printf("go run dumper.go exited with error: %s", err)
 		status = 1
 	}

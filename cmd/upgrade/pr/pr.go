@@ -7,11 +7,10 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"strings"
 	"time"
 
-	"github.com/appilon/tfplugin/cmd"
+	"github.com/appilon/tfplugin/util"
 	"github.com/google/go-github/github"
 	"github.com/mitchellh/cli"
 	"github.com/pkg/browser"
@@ -56,28 +55,28 @@ func (c *command) Run(args []string) int {
 	flags.BoolVar(&openBrowser, "browser", false, "open created pull request in browser")
 	flags.Parse(args)
 
-	providerPath, err := cmd.FindProvider(provider)
+	providerPath, err := util.FindProvider(provider)
 	if err != nil {
 		log.Printf("Error finding provider: %s", err)
 		return 1
 	}
 
-	if err = run(providerPath, "git", "checkout", "-b", branch); err != nil {
+	if err = util.Run(providerPath, "git", "checkout", "-b", branch); err != nil {
 		log.Printf("Error creating git branch %q: %s", branch, err)
 		return 1
 	}
 
-	if err = run(providerPath, "git", "add", "--all"); err != nil {
+	if err = util.Run(providerPath, "git", "add", "--all"); err != nil {
 		log.Printf("Error adding files: %s", err)
 		return 1
 	}
 
-	if err = run(providerPath, "git", "commit", "-m", message); err != nil {
+	if err = util.Run(providerPath, "git", "commit", "-m", message); err != nil {
 		log.Printf("Error committing: %s", err)
 		return 1
 	}
 
-	if err = run(providerPath, "git", "push", remote, branch); err != nil {
+	if err = util.Run(providerPath, "git", "push", remote, branch); err != nil {
 		log.Printf("Error pushing to %s: %s", remote, err)
 		return 1
 	}
@@ -90,15 +89,6 @@ func (c *command) Run(args []string) int {
 	}
 
 	return 0
-}
-
-func run(dir, name string, arg ...string) error {
-	fmt.Printf("==> %s %s\n", name, strings.Join(arg, " "))
-	cmd := exec.Command(name, arg...)
-	cmd.Dir = dir
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-	return cmd.Run()
 }
 
 func openPullRequest(providerPath, base, head, user, title string, openBrowser bool) error {

@@ -1,10 +1,12 @@
-package cmd
+package util
 
 import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 func FindProvider(providerPath string) (string, error) {
@@ -34,4 +36,13 @@ func FindProvider(providerPath string) (string, error) {
 	}
 
 	return "", fmt.Errorf("Could not find %s in GOPATH: %s", providerPath, gopath)
+}
+
+func Run(dir, name string, arg ...string) error {
+	os.Stderr.WriteString(fmt.Sprintf("==> %s %s\n", name, strings.Join(arg, " ")))
+	cmd := exec.Command(name, arg...)
+	cmd.Dir = dir
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	return cmd.Run()
 }
