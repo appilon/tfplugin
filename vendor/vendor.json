@@ -131,6 +131,12 @@
 			"revisionTime": "2018-08-24T00:41:14Z"
 		},
 		{
+			"checksumSHA1": "d8gWoI2+Lcrgvivk5Vt7aos737k=",
+			"path": "github.com/pkg/browser",
+			"revision": "0a3d74bf9ce488f035cf5bc36f753a711bc74334",
+			"revisionTime": "2018-09-16T01:17:32Z"
+		},
+		{
 			"checksumSHA1": "r5JeIR6baeDd4lgdeBWOUxgY0dc=",
 			"path": "github.com/posener/complete",
 			"revision": "3ef9b31a6a0613ae832e7ecf208374027c3b2343",

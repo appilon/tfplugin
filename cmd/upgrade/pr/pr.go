@@ -14,6 +14,7 @@ import (
 	"github.com/appilon/tfplugin/cmd"
 	"github.com/google/go-github/github"
 	"github.com/mitchellh/cli"
+	"github.com/pkg/browser"
 	"golang.org/x/oauth2"
 )
 
@@ -129,7 +130,7 @@ func openPullRequest(providerPath, base, head, user, title string) error {
 		return err
 	}
 	fmt.Printf("\nPull request created, view at: %s\n", pr.GetHTMLURL())
-	return nil
+	return browser.OpenURL(pr.GetHTMLURL())
 }
 
 func getGitHubDetails(providerPath string) (string, string, error) {
