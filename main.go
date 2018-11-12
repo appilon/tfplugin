@@ -14,7 +14,7 @@ import (
 
 func main() {
 	log.SetFlags(log.Llongfile)
-	c := cli.NewCLI("tfplugin", "0.1.0")
+	c := cli.NewCLI("tfplugin", "0.2.0")
 	c.Args = os.Args[1:]
 	c.Commands = map[string]cli.CommandFactory{
 		schema.CommandName: schema.CommandFactory,
