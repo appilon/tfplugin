@@ -61,22 +61,22 @@ func (c *command) Run(args []string) int {
 		return 1
 	}
 
-	if err = util.Run(providerPath, "git", "checkout", "-b", branch); err != nil {
+	if err = util.Run(os.Environ(), providerPath, "git", "checkout", "-b", branch); err != nil {
 		log.Printf("Error creating git branch %q: %s", branch, err)
 		return 1
 	}
 
-	if err = util.Run(providerPath, "git", "add", "--all"); err != nil {
+	if err = util.Run(os.Environ(), providerPath, "git", "add", "--all"); err != nil {
 		log.Printf("Error adding files: %s", err)
 		return 1
 	}
 
-	if err = util.Run(providerPath, "git", "commit", "-m", message); err != nil {
+	if err = util.Run(os.Environ(), providerPath, "git", "commit", "-m", message); err != nil {
 		log.Printf("Error committing: %s", err)
 		return 1
 	}
 
-	if err = util.Run(providerPath, "git", "push", remote, branch); err != nil {
+	if err = util.Run(os.Environ(), providerPath, "git", "push", remote, branch); err != nil {
 		log.Printf("Error pushing to %s: %s", remote, err)
 		return 1
 	}

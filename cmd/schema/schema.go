@@ -92,7 +92,7 @@ func (c *command) Run(args []string) int {
 	// going forward errors don't exit right away, attempt cleanup
 	var status int
 
-	if err = util.Run(fullPath, "go", "run", "dumper.go"); err != nil {
+	if err = util.Run(os.Environ(), fullPath, "go", "run", "dumper.go"); err != nil {
 		log.Printf("go run dumper.go exited with error: %s", err)
 		status = 1
 	}

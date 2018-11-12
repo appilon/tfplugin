@@ -16,7 +16,7 @@ func FindProvider(providerPath string) (string, error) {
 
 	gopath := os.Getenv("GOPATH")
 	if gopath == "" {
-		errors.New("GOPATH is empty")
+		return "", errors.New("GOPATH is empty")
 	}
 	gopaths := filepath.SplitList(gopath)
 
@@ -38,11 +38,12 @@ func FindProvider(providerPath string) (string, error) {
 	return "", fmt.Errorf("Could not find %s in GOPATH: %s", providerPath, gopath)
 }
 
-func Run(dir, name string, arg ...string) error {
+func Run(env []string, dir, name string, arg ...string) error {
 	os.Stderr.WriteString(fmt.Sprintf("==> %s %s\n", name, strings.Join(arg, " ")))
 	cmd := exec.Command(name, arg...)
 	cmd.Dir = dir
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
+	cmd.Env = env
 	return cmd.Run()
 }
