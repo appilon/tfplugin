@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/appilon/tfplugin/util"
 	"github.com/google/go-github/github"
@@ -36,23 +35,19 @@ func CommandFactory() (cli.Command, error) {
 func (c *command) Run(args []string) int {
 	flags := flag.NewFlagSet(CommandName, flag.ExitOnError)
 	var branch string
-	var message string
 	var remote string
 	var open bool
-	var openBrowser bool
 	var base string
 	var user string
 	var title string
 	var provider string
-	flags.StringVar(&branch, "branch", "tfplugin-upgrade-"+time.Now().Format("2006-01-02-15-04-05"), "name of branch to create")
-	flags.StringVar(&message, "message", "sdk upgrade", "commit message")
+	flags.StringVar(&branch, "branch", "", "name of branch to pull request")
 	flags.StringVar(&remote, "remote", "origin", "remote to push to")
 	flags.StringVar(&provider, "provider", "", "provider to pull request")
 	flags.StringVar(&base, "base", "master", "base branch to open pull request against")
 	flags.StringVar(&user, "user", "", "github user/org for cross account pull requests")
 	flags.StringVar(&title, "title", "sdk upgrade", "title of the pull request")
-	flags.BoolVar(&open, "open", false, "open pull request automatically, requires GITHUB_PERSONAL_TOKEN")
-	flags.BoolVar(&openBrowser, "browser", false, "open created pull request in browser")
+	flags.BoolVar(&open, "open", false, "open created pull request in browser")
 	flags.Parse(args)
 
 	providerPath, err := util.FindProvider(provider)
@@ -61,40 +56,27 @@ func (c *command) Run(args []string) int {
 		return 1
 	}
 
-	if err = util.Run(os.Environ(), providerPath, "git", "checkout", "-b", branch); err != nil {
-		log.Printf("Error creating git branch %q: %s", branch, err)
+	if err := util.Run(os.Environ(), providerPath, "git", "push", remote, branch); err != nil {
+		log.Printf("Error pushing to %s/%s: %s", remote, branch, err)
 		return 1
 	}
 
-	if err = util.Run(os.Environ(), providerPath, "git", "add", "--all"); err != nil {
-		log.Printf("Error adding files: %s", err)
+	if pr, err := openPullRequest(providerPath, base, branch, user, title); err != nil {
+		log.Printf("Error opening pull request: %s", err)
 		return 1
-	}
-
-	if err = util.Run(os.Environ(), providerPath, "git", "commit", "-m", message); err != nil {
-		log.Printf("Error committing: %s", err)
-		return 1
-	}
-
-	if err = util.Run(os.Environ(), providerPath, "git", "push", remote, branch); err != nil {
-		log.Printf("Error pushing to %s: %s", remote, err)
-		return 1
-	}
-
-	if open {
-		if err = openPullRequest(providerPath, base, branch, user, title, openBrowser); err != nil {
-			log.Printf("Error opening pull request: %s", err)
-			return 1
+	} else if open {
+		if err := browser.OpenURL(pr.GetHTMLURL()); err != nil {
+			log.Printf("Error opening %s in browser: %s", pr.GetHTMLURL(), err)
 		}
 	}
 
 	return 0
 }
 
-func openPullRequest(providerPath, base, head, user, title string, openBrowser bool) error {
+func openPullRequest(providerPath, base, head, user, title string) (*github.PullRequest, error) {
 	token := os.Getenv("GITHUB_PERSONAL_TOKEN")
 	if token == "" {
-		return errors.New("No GITHUB_PERSONAL_TOKEN set")
+		return nil, errors.New("No GITHUB_PERSONAL_TOKEN set")
 	}
 
 	ctx := context.Background()
@@ -106,7 +88,7 @@ func openPullRequest(providerPath, base, head, user, title string, openBrowser b
 
 	owner, repo, err := getGitHubDetails(providerPath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if user != "" {
@@ -119,14 +101,11 @@ func openPullRequest(providerPath, base, head, user, title string, openBrowser b
 		Base:  github.String(base),
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	fmt.Printf("\nPull request created, view at: %s\n", pr.GetHTMLURL())
+	os.Stderr.WriteString(fmt.Sprintf("\nPull request created, view at: %s\n", pr.GetHTMLURL()))
 
-	if openBrowser {
-		err = browser.OpenURL(pr.GetHTMLURL())
-	}
-	return err
+	return pr, nil
 }
 
 func getGitHubDetails(providerPath string) (string, string, error) {

@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/appilon/tfplugin/util"
 	"github.com/mitchellh/cli"
@@ -25,14 +24,6 @@ func (c *command) Synopsis() string {
 
 func CommandFactory() (cli.Command, error) {
 	return &command{}, nil
-}
-
-func getPackageName(providerPath string) (string, error) {
-	lastDash := strings.LastIndexByte(providerPath, '-')
-	if lastDash == -1 || len(providerPath) == lastDash+1 {
-		return "", fmt.Errorf("%s does not follow provider naming convention terraform-provider-name", providerPath)
-	}
-	return providerPath[lastDash+1:], nil
 }
 
 func moveVendoredTerraform(path string, undo bool) (bool, error) {
@@ -65,7 +56,7 @@ func (c *command) Run(args []string) int {
 		return 1
 	}
 
-	packageName, err := getPackageName(fullPath)
+	packageName, err := util.GetPackageName(fullPath)
 	if err != nil {
 		log.Printf("Error determining package exporting provider: %s", err)
 		return 1
