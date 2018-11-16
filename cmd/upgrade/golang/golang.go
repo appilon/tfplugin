@@ -56,15 +56,19 @@ func (c *command) Run(args []string) int {
 		return 1
 	}
 
-	if fromStr == "" {
-		log.Print("-from must be set")
-		return 1
-	}
-
-	from, err := version.NewVersion(fromStr)
-	if err != nil {
-		log.Printf("Error parsing -from: %s", err)
-		return 1
+	var from *version.Version
+	if fromStr != "" {
+		from, err = version.NewVersion(fromStr)
+		if err != nil {
+			log.Printf("Error parsing -from: %s", err)
+			return 1
+		}
+	} else {
+		from, err = detectGoVersionFromTravis(providerPath)
+		if err != nil {
+			log.Printf("Could not detect go version from .travis.yml: %s", err)
+			return 1
+		}
 	}
 
 	to, err := version.NewVersion(toStr)
@@ -146,10 +150,43 @@ func updateReadme(providerPath string, from, to *version.Version) error {
 	return ioutil.WriteFile(filename, []byte(out), 0644)
 }
 
+func detectGoVersionFromTravis(providerPath string) (*version.Version, error) {
+	filename := filepath.Join(providerPath, ".travis.yml")
+	content, err := ioutil.ReadFile(filename)
+	if os.IsNotExist(err) {
+		// support alternative extension
+		filename = filepath.Join(providerPath, ".travis.yaml")
+		content, err = ioutil.ReadFile(filename)
+	} else if err != nil {
+		return nil, err
+	}
+
+	var goLine int
+	lines := strings.Split(string(content), "\n")
+	for i, line := range lines {
+		if strings.Contains(line, "language: go") {
+			goLine = i + 1
+			break
+		}
+	}
+	if goLine == 0 {
+		return nil, errors.New("no 'language: go' in .travis.yml")
+	}
+
+	v := strings.TrimLeft(lines[goLine+1], ` -"`)
+	v = strings.TrimRight(v, ` "x.`)
+
+	return version.NewVersion(v)
+}
+
 func updateTravis(providerPath string, v string) error {
 	filename := filepath.Join(providerPath, ".travis.yml")
 	content, err := ioutil.ReadFile(filename)
-	if err != nil {
+	if os.IsNotExist(err) {
+		// support alternative extension
+		filename = filepath.Join(providerPath, ".travis.yaml")
+		content, err = ioutil.ReadFile(filename)
+	} else if err != nil {
 		return err
 	}
 
