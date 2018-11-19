@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
-set -Eeuxo pipefail
+set -Eeuo pipefail
+
+scripts=$(dirname "$0")
+source "$scripts/skip-providers.sh"
 
 pushd $GOPATH/src/github.com/terraform-providers
 
 for git_uri in $(cat repos.json | jq -r '.[] | .ssh_url'); do
     repo_dir=$(basename $git_uri .git)
-    if [[ -d $repo_dir ]]
+    skip=$(skip_provider "$repo_dir")
+    if [[ -d $repo_dir ]] && [[ -z "$skip" ]]
     then
         pushd $repo_dir
         git checkout -b "tfplugin-$(date +%F)"

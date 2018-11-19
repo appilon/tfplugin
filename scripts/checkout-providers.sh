@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-set -Eeuxo pipefail
+set -Eeuo pipefail
+
+scripts=$(dirname "$0")
+source "$scripts/skip-providers.sh"
 
 mkdir -p $GOPATH/src/github.com/terraform-providers
 pushd $GOPATH/src/github.com/terraform-providers
@@ -8,7 +11,8 @@ curl 'https://api.github.com/orgs/terraform-providers/repos?per_page=200' > repo
 
 for git_uri in $(cat repos.json | jq -r '.[] | .ssh_url'); do
     repo_dir=$(basename $git_uri .git)
-    if [[ ! -d $repo_dir ]]
+    skip=$(skip_provider "$repo_dir")
+    if [[ ! -d $repo_dir ]] && [[ -z "$skip" ]]
     then
         git clone --depth 1 $git_uri
     fi
