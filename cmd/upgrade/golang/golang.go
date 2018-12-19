@@ -18,7 +18,13 @@ import (
 
 const CommandName = "upgrade go"
 
+var Go111 *version.Version
+
 type command struct{}
+
+func init() {
+	Go111 = version.Must(version.NewVersion("1.11.0"))
+}
 
 func (c *command) Help() string {
 	return ""
@@ -77,7 +83,7 @@ func (c *command) Run(args []string) int {
 		return 1
 	}
 
-	if err := updateTravis(providerPath, to.String()); err != nil {
+	if err := updateTravis(providerPath, to); err != nil {
 		log.Printf("Error updating .travis.yml: %s", err)
 		return 1
 	}
@@ -116,7 +122,10 @@ func (c *command) Run(args []string) int {
 		}
 
 		if message == "" {
-			message = "provider: Require Go " + toStr + " in TravisCI and README\n"
+			message = "provider: Require Go " + to.String() + " in TravisCI and README\n"
+			if to.Compare(Go111) >= 0 {
+				message += "NOTE: added GO111MODULE=off to travis config to enforce legacy go get behavior\n"
+			}
 			if fix {
 				message += "provider: Run go fix\n"
 			}
@@ -179,7 +188,7 @@ func detectGoVersionFromTravis(providerPath string) (*version.Version, error) {
 	return version.NewVersion(v)
 }
 
-func updateTravis(providerPath string, v string) error {
+func updateTravis(providerPath string, to *version.Version) error {
 	filename := filepath.Join(providerPath, ".travis.yml")
 	content, err := ioutil.ReadFile(filename)
 	if os.IsNotExist(err) {
@@ -190,19 +199,57 @@ func updateTravis(providerPath string, v string) error {
 		return err
 	}
 
-	var goLine int
 	lines := strings.Split(string(content), "\n")
-	for i, line := range lines {
-		if strings.Contains(line, "language: go") {
-			goLine = i + 1
-			break
+
+	if contains(lines, "language: go", 0) == -1 {
+		return errors.New("no 'language: go' in travis config")
+	}
+
+	goLine := contains(lines, "go:", 0)
+	if goLine == -1 {
+		return errors.New("no 'go:' in travis config")
+	}
+
+	lines = set(lines, goLine+1, fmt.Sprintf("  - %s", to))
+
+	if to.Compare(Go111) >= 0 {
+		envLine := contains(lines, "env:", 0)
+		if envLine == -1 {
+			last := len(lines) - 1
+			lines = insertBefore(lines, last, "env:")
+			envLine = contains(lines, "env:", last)
+		}
+
+		globalLine := contains(lines, "global:", envLine)
+		if globalLine == -1 {
+			lines = insertBefore(lines, envLine+1, "  - GO111MODULE=off")
+		} else {
+			lines = insertBefore(lines, globalLine+1, "    - GO111MODULE=off")
 		}
 	}
-	if goLine == 0 {
-		return errors.New("no 'language: go' in .travis.yml")
-	}
-	lines[goLine+1] = fmt.Sprintf("- %s", v)
 
-	out := strings.Join(lines, "\n")
-	return ioutil.WriteFile(filename, []byte(out), 0644)
+	return ioutil.WriteFile(filename, []byte(strings.Join(lines, "\n")), 0644)
+}
+
+func contains(lines []string, search string, start int) int {
+	for i := start; i < len(lines); i++ {
+		if strings.Contains(lines[i], search) {
+			return i
+		}
+	}
+	return -1
+}
+
+func set(lines []string, index int, line string) []string {
+	if index < len(lines) {
+		lines[index] = line
+	} else {
+		lines = append(lines, line)
+	}
+	return lines
+}
+
+// taken from https://github.com/golang/go/wiki/SliceTricks
+func insertBefore(lines []string, index int, line string) []string {
+	return append(lines[:index], append([]string{line}, lines[index:]...)...)
 }
