@@ -124,7 +124,7 @@ func (c *command) Run(args []string) int {
 		if message == "" {
 			message = "provider: Require Go " + to.String() + " in TravisCI and README\n"
 			if to.Compare(Go111) >= 0 {
-				message += "NOTE: added GO111MODULE=off to travis config to enforce legacy go get behavior\n"
+				message += "NOTE: ensured GO111MODULE=off in travis config to enforce legacy go get behavior\n"
 			}
 			if fix {
 				message += "provider: Run go fix\n"
@@ -212,7 +212,7 @@ func updateTravis(providerPath string, to *version.Version) error {
 
 	lines = set(lines, goLine+1, fmt.Sprintf("  - %s", to))
 
-	if to.Compare(Go111) >= 0 {
+	if to.Compare(Go111) >= 0 && contains(lines, "GO111MODULE=off", 0) == -1 {
 		envLine := contains(lines, "env:", 0)
 		if envLine == -1 {
 			last := len(lines) - 1
