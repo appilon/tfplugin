@@ -29,4 +29,4 @@ $ cat provider.json | tfplugin docs -resource=netlify_hook
 The doc generation is very much still a work in progress.
 
 ## Provider auto upgrade
-providers can be converted to go modules, have go version bumped in Travis and README, as well as the version of the vendored Terraform SDK bumped. See [scripts/upgrade-providers.sh](scripts/upgrade-providers.sh) as an example
+providers can be converted to go modules, have go version bumped in Travis and README, as well as the version of the vendored Terraform SDK bumped. See [scripts/upgrade-providers.sh](scripts/upgrade-providers.sh) as an example. For a more detailed walkthrough specific to the important 0.12 upgrade see [this](cmd/upgrade)
