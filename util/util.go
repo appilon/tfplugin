@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -89,4 +90,13 @@ func SetLine(lines []string, index int, line string) []string {
 // taken from https://github.com/golang/go/wiki/SliceTricks
 func InsertLineBefore(lines []string, index int, line string) []string {
 	return append(lines[:index], append([]string{line}, lines[index:]...)...)
+}
+
+func DeleteLines(lines []string, toDelete ...int) []string {
+	sort.Ints(toDelete)
+	for i, index := range toDelete {
+		index -= i
+		lines = append(lines[:index], lines[index+1:]...)
+	}
+	return lines
 }

@@ -2,9 +2,11 @@ package modules
 
 import (
 	"flag"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/appilon/tfplugin/util"
 	"github.com/mitchellh/cli"
@@ -94,13 +96,41 @@ func (c *command) Run(args []string) int {
 }
 
 func removeGovendorFromTravis(providerPath string) error {
-	//filename, content, err := util.ReadOneOf(providerPath, ".travis.yml", ".travis.yaml")
-	return nil
+	filename, content, err := util.ReadOneOf(providerPath, ".travis.yml", ".travis.yaml")
+	if err != nil {
+		return err
+	}
+	lines := strings.Split(string(content), "\n")
+
+	if goGetLine := util.SearchLines(lines, "github.com/kardianos/govendor", 0); goGetLine > -1 {
+		lines = util.DeleteLines(lines, goGetLine)
+	}
+
+	if vendorStatusLine := util.SearchLines(lines, "vendor-status", 0); vendorStatusLine > -1 {
+		lines = util.DeleteLines(lines, vendorStatusLine)
+	}
+
+	return ioutil.WriteFile(filename, []byte(strings.Join(lines, "\n")), 0644)
 }
 
 func removeGovendorFromMakefile(providerPath string) error {
-	//filename, content, err := util.ReadOneOf(providerPath, "Makefile", "GNUmakefile")
-	return nil
+	filename, content, err := util.ReadOneOf(providerPath, "Makefile", "GNUmakefile")
+	if err != nil {
+		return err
+	}
+	lines := strings.Split(string(content), "\n")
+
+	if goGetLine := util.SearchLines(lines, "github.com/kardianos/govendor", 0); goGetLine > -1 {
+		lines = util.DeleteLines(lines, goGetLine)
+	}
+
+	if vendorStatusTargetLine := util.SearchLines(lines, "vendor-status:", 0); vendorStatusTargetLine > -1 {
+		lines = util.DeleteLines(lines, vendorStatusTargetLine, vendorStatusTargetLine+1)
+	}
+
+	out := strings.Replace(strings.Join(lines, "\n"), "vendor-status", "", -1)
+
+	return ioutil.WriteFile(filename, []byte(out), 0644)
 }
 
 func Env() []string {
