@@ -3,6 +3,7 @@ package util
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -54,4 +55,38 @@ func Run(env []string, dir, name string, arg ...string) error {
 	cmd.Stdout = os.Stdout
 	cmd.Env = env
 	return cmd.Run()
+}
+
+func ReadOneOf(dir string, filenames ...string) (fullpath string, content []byte, err error) {
+	for _, filename := range filenames {
+		fullpath = filepath.Join(dir, filename)
+		content, err = ioutil.ReadFile(fullpath)
+		if err == nil {
+			break
+		}
+	}
+	return
+}
+
+func SearchLines(lines []string, search string, start int) int {
+	for i := start; i < len(lines); i++ {
+		if strings.Contains(lines[i], search) {
+			return i
+		}
+	}
+	return -1
+}
+
+func SetLine(lines []string, index int, line string) []string {
+	if index < len(lines) {
+		lines[index] = line
+	} else {
+		lines = append(lines, line)
+	}
+	return lines
+}
+
+// taken from https://github.com/golang/go/wiki/SliceTricks
+func InsertLineBefore(lines []string, index int, line string) []string {
+	return append(lines[:index], append([]string{line}, lines[index:]...)...)
 }

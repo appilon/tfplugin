@@ -15,13 +15,13 @@ Although our acceptance tests run in TeamCity, pre-checks for pull requests run 
 
 ```yaml
 env:
-  - GO111MODULE=off
+  - GOFLAGS=-mod=vendor
 ```
 or
 ```yaml
 env:
   global:
-    - GO111MODULE=off
+    - GOFLAGS=-mod=vendor
 ```
 
 This will ensure the `go get` behavior and build system remains on the "legacy" `GOPATH` and `vendor/` system.
@@ -136,7 +136,7 @@ $ tfplugin upgrade sdk -to master -commit
 ### Run acceptance tests
 A provider compiled with the TF 0.12 SDK should still work with TF v0.11 and HCL1 configurations (Please let us know if it doesn't!!!). However a provider's acceptance test configurations will need to be upgraded to HCL2 syntax. This is because the acceptance tests run in-process against the vendored test harness, which in turn calls into the vendored Terraform Core, which is v0.12 and no longer parses HCL1.
 
-If you have the ability to run the acceptance tests locally via `make testacc` do so and see what happens. You can expect a variety of configuration failures and its time to work through them. If you are a HashiCorp employee you can login to TeamCity OSS and run the provider acceptance tests (if you have no local setup), just make sure to specify your branch and _set the version of go to 1.11.4_.
+If you have the ability to run the acceptance tests locally via `make testacc` do so and see what happens. You can expect a variety of configuration failures and its time to work through them. If you are a HashiCorp employee you can login to TeamCity OSS and run the provider acceptance tests (if you have no local setup), just make sure to specify your branch and set the version of go appropriately.
 
 ### Run Travis
 To run travis (to my knowledge) you will need to create a pull request. `tfplugin` can create one if you specify an access token with `GITHUB_PERSONAL_TOKEN`, just note the pull request will be coming from the associated GitHub account.

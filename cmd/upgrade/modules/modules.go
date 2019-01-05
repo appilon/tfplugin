@@ -31,9 +31,11 @@ func (c *command) Run(args []string) int {
 	var provider string
 	var commit bool
 	var message string
+	var removeGovendor bool
 	flags.StringVar(&provider, "provider", "", "provider to switch to go modules")
 	flags.BoolVar(&commit, "commit", false, "changes will be committed")
-	flags.StringVar(&message, "message", "vendor with go modules", "specify commit message")
+	flags.StringVar(&message, "message", "deps: use go modules for dep mgmt\n", "specify commit message")
+	flags.BoolVar(&removeGovendor, "remove-govendor", false, "remove govendor from makefile and travis config")
 	flags.Parse(args)
 
 	providerPath, err := util.FindProvider(provider)
@@ -62,7 +64,21 @@ func (c *command) Run(args []string) int {
 		return 1
 	}
 
+	if err := removeGovendorFromTravis(providerPath); err != nil {
+		log.Printf("Error removing govendor from travis config in %s: %s", providerPath, err)
+		return 1
+	}
+
+	if err := removeGovendorFromMakefile(providerPath); err != nil {
+		log.Printf("Error removing govendor from makefile in %s: %s", providerPath, err)
+		return 1
+	}
+
 	if commit {
+		if removeGovendor {
+			message += "remove govendor from makefile and travis config\n"
+		}
+
 		if err = util.Run(os.Environ(), providerPath, "git", "add", "--all"); err != nil {
 			log.Printf("Error adding files: %s", err)
 			return 1
@@ -75,6 +91,16 @@ func (c *command) Run(args []string) int {
 	}
 
 	return 0
+}
+
+func removeGovendorFromTravis(providerPath string) error {
+	//filename, content, err := util.ReadOneOf(providerPath, ".travis.yml", ".travis.yaml")
+	return nil
+}
+
+func removeGovendorFromMakefile(providerPath string) error {
+	//filename, content, err := util.ReadOneOf(providerPath, "Makefile", "GNUmakefile")
+	return nil
 }
 
 func Env() []string {

@@ -12,10 +12,10 @@ for git_uri in $(cat repos.json | jq -r '.[] | .ssh_url'); do
     if [[ -d $repo_dir ]] && [[ -z "$skip" ]]
     then
         pushd $repo_dir
-        git checkout -b "tfplugin-$(date +%F)"
+        git checkout -b "v0.12-upgrade-$(date +%F)"
         tfplugin upgrade go -fix -fmt -commit
         tfplugin upgrade modules -commit
-        tfplugin upgrade sdk -to v0.12.0-alpha2 -commit
+        tfplugin upgrade sdk -to pluginsdk-v0.12-early1 -commit
         tfplugin upgrade pr -branch="$(git rev-parse --abbrev-ref HEAD)"
         popd
     fi

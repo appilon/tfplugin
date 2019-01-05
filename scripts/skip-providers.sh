@@ -3,7 +3,7 @@ skip_provider () {
     declare -a arr=("")
     for i in "${arr[@]}"
     do
-        if [ "$i" = "$1" ]
+        if [ "terraform-provider-$i" = "$1" ]
         then
             echo "skip"
             return
