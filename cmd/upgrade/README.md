@@ -11,20 +11,7 @@ Go 1.11 brings [go modules](https://github.com/golang/go/wiki/Modules), the "off
 Go into the readme and replace any references to the required version of go to 1.11
 
 #### Update .travis.yml
-Although our acceptance tests run in TeamCity, pre-checks for pull requests run in Travis. You will need to update the version of go required to 1.11, you also need to force go modules to be off. This is accomplished by adding an environment variable
-
-```yaml
-env:
-  - GOFLAGS=-mod=vendor
-```
-or
-```yaml
-env:
-  global:
-    - GOFLAGS=-mod=vendor
-```
-
-This will ensure the `go get` behavior and build system remains on the "legacy" `GOPATH` and `vendor/` system.
+Although our acceptance tests run in TeamCity, pre-checks for pull requests run in Travis. You will need to update the version of go required to 1.11.
 
 #### Run go fix (optional)
 It's always good to ensure the provider codebase uses the latest APIs and syntax after a version upgrade.
@@ -47,7 +34,7 @@ $ gofmt -s -w ./<provider_package>
 $ tfplugin upgrade go -fix -fmt -commit
 ```
 
-If you would like to be explicit about the version of go in the README.md, and explicit with the version you are upgrading to use the flags `-from` and `-to`
+If you would like to be explicit about the version of go in the README.md, and explicit with the version you are upgrading to use the flags `-from` and `-to`.
 
 ```
 $ tfplugin upgrade go -from 1.8 -to 1.11
@@ -55,20 +42,6 @@ $ tfplugin upgrade go -from 1.8 -to 1.11
 
 ### Switch to modules
 You can switch a provider to start using modules, however our build systems will still be using `vendor/` for the time being.
-
-#### Purge govendor usage (or any other dependency manager)
-Most providers were managed with `govendor` and even if they weren't there is likely some remnant of it in the project makefile and/or travis config. PLEASE NOTE: as of writing `tfplugin` does not perform this yet, however it is in progress.
-
-##### In the travis config
-* Remove any lines resembling `go get github.com/kardianos/govendor`
-* Remove any lines resembling `make vendor-status`
-
-##### In the Makefile or GNUmakefile
-* Remove any lines resembling `go get github.com/kardianos/govendor`
-* Remove the `vendor-status` target and any references to it throughout the file
-* Remove any other `govendor` usage/figure out the `go mod` equivalent
-
-There is likely a `go mod` equivalent to `govendor status` we could substitute in instead if we wanted to keep this check. If I learn it from someone or look into it I will update the guide.
 
 #### Run go mod
 `go mod` will do most of the work importing from whatever previous tool was in place. The main annoyance is if your machine has the provider on the GOPATH you will need to force `GO111MODULE=on` for these commands to work.
@@ -100,11 +73,24 @@ We still use vendoring in the end, this will copy the exact dependencies into `v
 $ GO111MODULE=on go mod vendor
 ```
 
+#### Purge govendor usage (or any other dependency manager)
+Most providers were managed with `govendor` and even if they weren't there is likely some remnant of it in the project makefile and/or travis config.
+
+##### In the travis config
+* Remove any lines resembling `go get github.com/kardianos/govendor`
+* Remove any lines resembling `make vendor-status`
+
+##### In the Makefile or GNUmakefile
+* Remove any lines resembling `go get github.com/kardianos/govendor`
+* Remove the `vendor-status` target and any references to it throughout the file
+
+We can likely emulate a similar behavior of `govendor status` using `go mod` and `git`.
+
 #### TFPLUGIN
-`tfplugin upgrade` can run these commands and commit for you.
+`tfplugin upgrade` can run these commands, remove `govendor` and commit for you.
 
 ```
-$ tfplugin upgrade modules -commit
+$ tfplugin upgrade modules -remove-govendor -commit
 ```
 
 ### Upgrade to Terraform 0.12

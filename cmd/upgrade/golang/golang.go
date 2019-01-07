@@ -122,10 +122,7 @@ func (c *command) Run(args []string) int {
 		}
 
 		if message == "" {
-			message = "provider: Require Go " + to.String() + " in TravisCI and README\n"
-			if to.Compare(Go111) >= 0 {
-				message += "NOTE: ensured GO111MODULE=off in travis config to enforce legacy go get behavior\n"
-			}
+			message = "provider: Require Go " + majorMinor(to) + " in TravisCI and README\n"
 			if fix {
 				message += "provider: Run go fix\n"
 			}
@@ -204,6 +201,8 @@ func updateTravis(providerPath string, to *version.Version) error {
 
 	lines = util.SetLine(lines, goLine+1, fmt.Sprintf(`  - "%s.x"`, majorMinor(to)))
 
+	/* TODO restore something similar in 'upgrade modules'
+
 	if to.Compare(Go111) >= 0 && util.SearchLines(lines, "GO111MODULE=off", 0) == -1 {
 		envLine := util.SearchLines(lines, "env:", 0)
 		if envLine == -1 {
@@ -219,6 +218,8 @@ func updateTravis(providerPath string, to *version.Version) error {
 			lines = util.InsertLineBefore(lines, globalLine+1, "    - GO111MODULE=off")
 		}
 	}
+
+	*/
 
 	return ioutil.WriteFile(filename, []byte(strings.Join(lines, "\n")), 0644)
 }

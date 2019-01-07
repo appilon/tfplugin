@@ -46,7 +46,7 @@ func (c *command) Run(args []string) int {
 	flags.StringVar(&provider, "provider", "", "provider to pull request")
 	flags.StringVar(&base, "base", "master", "base branch to open pull request against")
 	flags.StringVar(&user, "user", "", "github user/org for cross account pull requests")
-	flags.StringVar(&title, "title", "sdk upgrade", "title of the pull request")
+	flags.StringVar(&title, "title", "[AUTOMATED] sdk upgrade", "title of the pull request")
 	flags.BoolVar(&open, "open", false, "open created pull request in browser")
 	flags.Parse(args)
 

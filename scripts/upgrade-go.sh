@@ -14,11 +14,9 @@ for git_uri in $(cat repos.json | jq -r '.[] | .ssh_url'); do
         pushd $repo_dir
         git checkout master
         git pull
-        git checkout -b "v0.12-upgrade-$(date +%F)"
+        git checkout -b "go1.11-upgrade-$(date +%F)"
         tfplugin upgrade go -fix -fmt -commit
-        tfplugin upgrade modules -commit
-        tfplugin upgrade sdk -to pluginsdk-v0.12-early1 -commit
-        tfplugin upgrade pr -branch="$(git rev-parse --abbrev-ref HEAD)"
+        tfplugin upgrade pr -branch="$(git rev-parse --abbrev-ref HEAD)" -title="[AUTOMATED] Upgrade to Go 1.11"
         popd
     fi
 done
