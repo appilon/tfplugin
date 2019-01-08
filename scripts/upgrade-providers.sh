@@ -12,7 +12,7 @@ for git_uri in $(cat repos.json | jq -r '.[] | select( .archived == false ) | .s
     if [[ -d $repo_dir ]] && [[ -z "$skip" ]]
     then
         pushd $repo_dir
-        git checkout master
+        git checkout -f master
         git pull
         git checkout -b "v0.12-upgrade-$(date +%F)"
         tfplugin upgrade go -fix -fmt -commit
