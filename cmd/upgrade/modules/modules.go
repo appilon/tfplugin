@@ -66,14 +66,16 @@ func (c *command) Run(args []string) int {
 		return 1
 	}
 
-	if err := removeGovendorFromTravis(providerPath); err != nil {
-		log.Printf("Error removing govendor from travis config in %s: %s", providerPath, err)
-		return 1
-	}
+	if removeGovendor {
+		if err := removeGovendorFromTravis(providerPath); err != nil {
+			log.Printf("Error removing govendor from travis config in %s: %s", providerPath, err)
+			return 1
+		}
 
-	if err := removeGovendorFromMakefile(providerPath); err != nil {
-		log.Printf("Error removing govendor from makefile in %s: %s", providerPath, err)
-		return 1
+		if err := removeGovendorFromMakefile(providerPath); err != nil {
+			log.Printf("Error removing govendor from makefile in %s: %s", providerPath, err)
+			return 1
+		}
 	}
 
 	if commit {

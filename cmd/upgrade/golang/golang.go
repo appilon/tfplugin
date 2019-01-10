@@ -18,13 +18,7 @@ import (
 
 const CommandName = "upgrade go"
 
-var Go111 *version.Version
-
 type command struct{}
-
-func init() {
-	Go111 = version.Must(version.NewVersion("1.11.0"))
-}
 
 func (c *command) Help() string {
 	return ""
