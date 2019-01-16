@@ -59,7 +59,7 @@ It's a good idea to nuke `vendor/`
 rm -rf vendor/
 ```
 
-#### tidy (optional)
+#### tidy (optional but do it)
 Tidy will add any missing imports and prune your project and update the `go.mod` and `go.sum` files.
 
 ```
@@ -72,6 +72,9 @@ We still use vendoring in the end, this will copy the exact dependencies into `v
 ```
 $ GO111MODULE=on go mod vendor
 ```
+
+#### Fix go get (and go generate) behavior now that we are module aware
+.travis.yml and the makefile will need to have all `go get`, `go generate`, and specifically `gometaliner --install` commands prefixed with `GO111MODULE=off`. This is because TravisCI will default to module mode, fetching CLI tools will fail in this mode. Alternatively you could just configure the whole environment for module mode off. As of writing `tfplugin` does not perform this (it can easily just haven't gotten to it).
 
 #### Purge govendor usage (or any other dependency manager)
 Most providers were managed with `govendor` and even if they weren't there is likely some remnant of it in the project makefile and/or travis config.
@@ -94,7 +97,7 @@ $ tfplugin upgrade modules -remove-govendor -commit
 ```
 
 ### Upgrade to Terraform 0.12
-As of writing it's advised to fetch the latest code `@master` to get all the latest bug fixes. In the future we will suggest upgrading to the latest official release.
+As of writing it's advised to fetch the branch `pluginsdk-v0.12-early2` to get all the latest bug fixes. In the future we will suggest upgrading to the latest official release.
 
 ```
 $ GO111MODULE=on go get github.com/hashicorp/terraform@master
@@ -103,7 +106,7 @@ $ GO111MODULE=on go get github.com/hashicorp/terraform@master
 I have noticed for some providers this leads to a compilation error in a transitive dependency? It might be worth specifying `-u` which will upgrade transitive dependencies to their latest `MINOR` release, this might solve the issue however in my specific experiences it just made another transitive dep fail to compile.
 
 ```
-$ GO111MODULE=on go get -u github.com/hashicorp/terraform@master
+$ GO111MODULE=on go get -u github.com/hashicorp/terraform@pluginsdk-v0.12-early2
 ```
 
 Remember to copy to `vendor/`
@@ -113,10 +116,10 @@ $ GO111MODULE=on go mod vendor
 ```
 
 #### TFPLUGIN
-`tfplugin upgrade` can run these commands and create a commit for you. By default it will specify the `latest` target (which will get the latest release, I'm not fully versed in modules yet, not sure if that includes major releases). Regardless we suggest getting `master`, this can be specified with the `-to` flag.
+`tfplugin upgrade` can run these commands and create a commit for you. By default it will specify the `latest` target (which will get the latest release, I'm not fully versed in modules yet, not sure if that includes major releases). Regardless we suggest getting `pluginsdk-v0.12-early2`, this can be specified with the `-to` flag.
 
 ```
-$ tfplugin upgrade sdk -to master -commit
+$ tfplugin upgrade sdk -to pluginsdk-v0.12-early2 -commit
 ```
 
 ### Run acceptance tests
@@ -138,4 +141,58 @@ $ tfplugin upgrade pr -branch="$(git rev-parse --abbrev-ref HEAD)" -title="new c
 ```
 
 ### HCL upgrades
-TODO: I will try and learn and detail the kinds of configuration upgrades that come up frequently. 
+These notes are very rough but they describe common issues and the fixes for them.
+
+1)
+```
+"id": {
+                Type:     schema.TypeString,
+                Computed: true,
+            },
+```
+This is an automatic attribute, do not declare it or InternalValidate() will fail
+
+2)
+The most common issue will be nested types such as Map and List now requiring an equals assignment, and nested types that are resources now needing to be a true nested blocks (no equals). Martin's words explain it best:
+
+>From a provider developer's perspective, that should be described as: any collection that has its `Elem` set to a `schema.Schema` is an "attribute" which must be set with the equals sign, while any where `Elem` is set to a `schema.Resource` is a "nested block" which must _not_ have the equals sign
+
+3)
+```
+resource "grafana_alert_notification" "test" {
+    type = "email"
+    name = "terraform-acc-test"
+    settings {
+			"addresses" = "foo@bar.test"
+			"uploadImage" = "false"
+			"autoResolve" = "true"
+		}
+}
+```
+In this situation we first encountered a parsing error claiming attributes cannot be quoted. This is because Terraform hasn't processed the schema yet and doesn't realize the real error is #2 ^. If you do remove the quotes (which are allowed for TypeMap), you will get the same error message as #2.
+
+4)
+Many of our test cases will check that a list is empty. In 0.12 if the config had no attribute at all it will not be in the state, therefore we _had_ failures as a result of the key/path not even existing. This has since been shimmed, however it might be good to switch these checks to use `TestCheckNoResourceAttr`
+```
+{
+				Config: testAccOrganizationConfig_usersUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccOrganizationCheckExists("grafana_organization.test", &org),
+					resource.TestCheckResourceAttr(
+						"grafana_organization.test", "name", "terraform-acc-test",
+					),
+					resource.TestCheckResourceAttr(
+						"grafana_organization.test", "admins.#", "0",
+					),
+					resource.TestCheckResourceAttr(
+						"grafana_organization.test", "editors.#", "1",
+					),
+					resource.TestCheckResourceAttr(
+						"grafana_organization.test", "editors.0", "john.doe@example.com",
+					),
+					resource.TestCheckResourceAttr(
+						"grafana_organization.test", "viewers.#", "0",
+					),
+				),
+			},
+```

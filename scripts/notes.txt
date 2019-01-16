@@ -1,0 +1,5 @@
+cloudflare nonstandard travis (skip)
+scaffolding not a real provider yet (skip)
+ucloud no travis config (skip)
+
+Open automated PRs here "https://github.com/search?q=org%3Aterraform-providers+is%3Apr+%22%5BAUTOMATED%5D%22+in%3Atitle"
