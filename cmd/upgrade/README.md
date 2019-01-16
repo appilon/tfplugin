@@ -100,13 +100,28 @@ $ tfplugin upgrade modules -remove-govendor -commit
 As of writing it's advised to fetch the branch `pluginsdk-v0.12-early2` to get all the latest bug fixes. In the future we will suggest upgrading to the latest official release.
 
 ```
-$ GO111MODULE=on go get github.com/hashicorp/terraform@master
+$ GO111MODULE=on go get github.com/hashicorp/terraform@pluginsdk-v0.12-early2
 ```
 
-I have noticed for some providers this leads to a compilation error in a transitive dependency? It might be worth specifying `-u` which will upgrade transitive dependencies to their latest `MINOR` release, this might solve the issue however in my specific experiences it just made another transitive dep fail to compile.
+I have noticed for some providers this leads to a compilation error in a transitive dependency? It might be worth specifying `-u` which will upgrade transitive dependencies to their latest `MINOR` release, this might solve the issue however in my specific experiences it fails without a helpful error message.
 
 ```
 $ GO111MODULE=on go get -u github.com/hashicorp/terraform@pluginsdk-v0.12-early2
+```
+
+UPDATE
+Digging deeper there appears to be a problem with a transitive dependency `cloud.google.com/go`. This is relied on by many projects, notably grpc which itself is relied on by a lot of this. you can inspect a providers graph with
+
+```
+$ GO111MODULE=on go mod graph
+```
+
+If you encounter an error when upgrading to the new sdk regarding that dependency, try this.
+```
+$ GO111MODULE=on go get -u cloud.google.com/go@master
+$ GO111MODULE=on go get github.com/hashicorp/terraform@pluginsdk-v0.12-early2
+$ GO111MODULE=on go mod tidy
+$ GO111MODULE=on go mod vendor
 ```
 
 Remember to copy to `vendor/`
@@ -121,6 +136,15 @@ $ GO111MODULE=on go mod vendor
 ```
 $ tfplugin upgrade sdk -to pluginsdk-v0.12-early2 -commit
 ```
+
+### GOVENDOR
+If you were not able to switch to go modules, you could still in theory vendor the new SDK with a tool such as `govendor`.
+
+```
+$ govendor fetch github.com/hashicorp/terraform/...@=pluginsdk-v0.12-early2
+```
+
+Compiling is likely broken at this point. I haven't had a chance to fully investigate this yet, however you likely need to start running through each broken dependency and updating it with `govendor fetch`. Transitive dependencies has always been the challenge in dependency management, it is likely best to try and ride out the storm with `go mod` as this will be the standard in time.
 
 ### Run acceptance tests
 A provider compiled with the TF 0.12 SDK should still work with TF v0.11 and HCL1 configurations (Please let us know if it doesn't!!!). However a provider's acceptance test configurations will need to be upgraded to HCL2 syntax. This is because the acceptance tests run in-process against the vendored test harness, which in turn calls into the vendored Terraform Core, which is v0.12 and no longer parses HCL1.
