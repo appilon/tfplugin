@@ -124,9 +124,10 @@ $ GO111MODULE=on go mod tidy
 $ GO111MODULE=on go mod vendor
 ```
 
-Remember to copy to `vendor/`
+Remember to tidy and copy to `vendor/`
 
 ```
+$ GO111MODULE=on go mod tidy
 $ GO111MODULE=on go mod vendor
 ```
 
