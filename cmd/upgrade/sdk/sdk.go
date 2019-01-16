@@ -94,6 +94,10 @@ func updateSDK(providerPath, version, depTool string) error {
 			return fmt.Errorf("Error fetching %s@%s: %s", TerraformRepo, version, err)
 		}
 
+		if err := util.Run(modules.Env(), providerPath, "go", "mod", "tidy"); err != nil {
+			return fmt.Errorf("Error running go mod tidy in %s: %s", providerPath, err)
+		}
+
 		if err := util.Run(modules.Env(), providerPath, "go", "mod", "vendor"); err != nil {
 			return fmt.Errorf("Error running go mod vendor in %s: %s", providerPath, err)
 		}
