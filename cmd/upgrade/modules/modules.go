@@ -36,7 +36,7 @@ func (c *command) Run(args []string) int {
 	var removeGovendor bool
 	flags.StringVar(&provider, "provider", "", "provider to switch to go modules")
 	flags.BoolVar(&commit, "commit", false, "changes will be committed")
-	flags.StringVar(&message, "message", "deps: use go modules for dep mgmt\n", "specify commit message")
+	flags.StringVar(&message, "message", "deps: use go modules for dep mgmt\nrun go mod tidy\n", "specify commit message")
 	flags.BoolVar(&removeGovendor, "remove-govendor", false, "remove govendor from makefile and travis config")
 	flags.Parse(args)
 
