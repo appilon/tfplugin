@@ -139,7 +139,7 @@ $ GO111MODULE=on go mod vendor
 ```
 
 #### TFPLUGIN
-`tfplugin upgrade` can run these commands and create a commit for you. By default it will specify the `latest` target (which will get the latest release, I'm not fully versed in modules yet, not sure if that includes major releases). Regardless we suggest getting `pluginsdk-v0.12-early2`, this can be specified with the `-to` flag.
+`tfplugin upgrade` can run these commands and create a commit for you (IT CURRENTLY DOES NOT HANDLE THE ENVIRONMENT VARIABLES RELATED TO MODULES JUST YET). By default it will specify the `latest` target (which will get the latest release, I'm not fully versed in modules yet, not sure if that includes major releases). Regardless we suggest getting `pluginsdk-v0.12-early2`, this can be specified with the `-to` flag.
 
 ```
 $ tfplugin upgrade sdk -to pluginsdk-v0.12-early2 -commit
