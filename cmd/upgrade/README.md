@@ -73,8 +73,15 @@ We still use vendoring in the end, this will copy the exact dependencies into `v
 $ GO111MODULE=on go mod vendor
 ```
 
-#### Fix go get (and go generate) behavior now that we are module aware
-.travis.yml and the makefile will need to have all `go get`, `go generate`, and specifically `gometaliner --install` commands prefixed with `GO111MODULE=off`. This is because TravisCI will default to module mode, fetching CLI tools will fail in this mode. Alternatively you could just configure the whole environment for module mode off. As of writing `tfplugin` does not perform this (it can easily just haven't gotten to it).
+#### Fix Travis
+
+Our dependencies are now all checked into `vendor/`. We need to instruct go to use that folder to for compilation. This is accomplished by setting `GO111MODULE=on` and `GOFLAGS=-mod=vendor`. You could achieve a similar solution with `GO111MODULE=off`, however there is a subtle difference that in module mode with `-mod=vendor`, all transitive dependencies are compiled from the top level `vendor/` folder and only that folder. The legacy mode `GO111MODULE=off` would find transitive dependencies for a dependency if there were any within a `vendor/` folder in THAT dependency.
+
+```
+provider-repo/vendor/github.com/hashicorp/terraform/vendor/github.com/hashicorp/consul
+```
+
+For tooling installs/generate, you will need to prefix `go get` `go generate` and `gometalinter --install` with `GO111MODULE=off`, this is to force the legacy mode, this is required to properly install those CLI tools or run `go generate`.
 
 #### Purge govendor usage (or any other dependency manager)
 Most providers were managed with `govendor` and even if they weren't there is likely some remnant of it in the project makefile and/or travis config.
