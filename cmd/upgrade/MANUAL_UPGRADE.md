@@ -88,7 +88,7 @@ GO111MODULE=on GOFLAGS=-mod=vendor make test
 If you have the ability to run the acceptance tests locally via `make testacc` do so and see what happens. You can expect a variety of configuration failures and its time to work through them. If you are a HashiCorp employee you can login to TeamCity OSS and run the provider acceptance tests (if you have no local setup), just make sure to specify your branch and set the version of go appropriately.
 
 ```
-GO111MODULE=on GOFLAGS=-mod=vendor make acctest
+GO111MODULE=on GOFLAGS=-mod=vendor make testacc
 ```
 
 ### Merge

@@ -54,7 +54,7 @@ resource "grafana_alert_notification" "test" {
 In this situation we first encountered a parsing error claiming attributes cannot be quoted. This is because Terraform hasn't processed the schema yet and doesn't realize the real error is #2 ^. If you do remove the quotes (which are allowed for TypeMap), you will get the same error message as #2.
 
 4)
-Many of our test cases will check that a list is empty. In 0.12 if the config had no attribute at all it will not be in the state, therefore we _had_ failures as a result of the key/path not even existing. This has since been shimmed, however it might be good to switch these checks to use `TestCheckNoResourceAttr`
+Many of our test cases will check that a list is empty. There are situations and configs now that would cause no state to be present. The most correct check would be to use `TestCheckNoResourceAttr`. This issue has since been hacked to still work (to minimize the amount of test changes).
 ```
 {
 				Config: testAccOrganizationConfig_usersUpdate,
