@@ -44,6 +44,25 @@ You could achieve a similar solution with `GO111MODULE=off`, however there is a 
 
 For tooling installs/generate, you will need to prefix `go get` `go generate` and `gometalinter --install` with `GO111MODULE=off`, this is to force the legacy mode, this is required to properly install those CLI tools or run `go generate`.
 
+### Prepare clean Go environment
+
+A few of us have experienced weird go module behaviours (e.g. corrupted cache) in the past,
+which lead us to believe it's best to have clean Go environment for any larger-scale
+changes involving go modules.
+
+Here's an example of how to prepare such environment via Docker:
+
+```bash
+dgo() {
+    local DESIRED_GO_VERSION="latest"
+    local NAME=$(basename "$PWD")
+    echo "Launching golang:${DESIRED_GO_VERSION} for ${NAME} ..."
+    docker run --rm -ti -e GO111MODULE=on -v "$PWD":/usr/src/${NAME} -w /usr/src/${NAME} golang:${DESIRED_GO_VERSION} bash
+}
+```
+
+Then you can just run `dgo` and carry on per instructions below.
+
 ### Run go mod
 `go mod` will do most of the work importing from whatever previous tool was in place. If the provider is in the $GOPATH you will need the environment variable `GO111MODULE=on` for these commands to work.
 
