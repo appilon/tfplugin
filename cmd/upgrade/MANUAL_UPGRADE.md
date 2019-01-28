@@ -35,6 +35,17 @@ Our CI checks that the provider passes `gofmt`, so make sure to run `gofmt`.
 $ gofmt -s -w ./<provider_package>
 ```
 
+### Encode go version
+
+Because Go 1.11 (modules specifically) is still in active development and bugs
+are getting fixed in every patch release it's advisable to pin to one particular version
+and codify it in [goenv](https://github.com/syndbg/goenv) format, which in practice
+results in `.go-version` file in the root with Go version.
+
+```
+$ goenv local 1.11.5
+```
+
 ## Switch to go modules
 You can switch a provider to start using modules, however our build systems will still be using `vendor/` for the time being.
 
