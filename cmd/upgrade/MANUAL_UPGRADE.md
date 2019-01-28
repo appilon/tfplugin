@@ -54,14 +54,14 @@ Here's an example of how to prepare such environment via Docker:
 
 ```bash
 dgo() {
-    local DESIRED_GO_VERSION="latest"
+    local DESIRED_GO_VERSION=${1:-latest}
     local NAME=$(basename "$PWD")
     echo "Launching golang:${DESIRED_GO_VERSION} for ${NAME} ..."
     docker run --rm -ti -e GO111MODULE=on -v "$PWD":/usr/src/${NAME} -w /usr/src/${NAME} golang:${DESIRED_GO_VERSION} bash
 }
 ```
 
-Then you can just run `dgo` and carry on per instructions below.
+Then you can just run `dgo 1.11.5` and carry on per instructions below.
 
 ### Run go mod
 `go mod` will do most of the work importing from whatever previous tool was in place. If the provider is in the $GOPATH you will need the environment variable `GO111MODULE=on` for these commands to work.
