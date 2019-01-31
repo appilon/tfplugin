@@ -78,3 +78,46 @@ Many of our test cases will check that a list is empty. There are situations and
 				),
 			},
 ```
+
+5)
+Similar to #2 sets can only be represented with nested blocks, therefore cannot have equals sign:
+```
+testing.go:568: Step 0 error: config is invalid: Incorrect attribute value type: Inappropriate value for attribute "process_types": set of map of string required.
+```
+```
+"process_types": {
+                Type:     schema.TypeSet,
+                Required: true,
+                ForceNew: true,
+                Elem: &schema.Schema{
+                    Type: schema.TypeMap,
+                },
+            },
+```
+```
+resource "heroku_app" "foobar" {
+    name = "%s"
+    region = "us"
+}
+
+resource "heroku_slug" "foobar" {
+    app = "${heroku_app.foobar.name}"
+    file_path = "test-fixtures/slug.tgz"
+    process_types = {
+        test = "echo 'Just a test'"
+        diag = "echo 'Just diagnosis'"
+    }
+}
+```
+
+6) Similarly list of maps need to be written correctly as
+```
+config = [
+	{
+		foo = "bar"
+	}
+]
+```
+```
+testing.go:568: Step 0 error: config is invalid: Incorrect attribute value type: Inappropriate value for attribute "config": list of map of string required.
+```
