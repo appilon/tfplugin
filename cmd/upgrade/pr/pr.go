@@ -2,18 +2,16 @@ package pr
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
+	"github.com/appilon/tfplugin/svc"
 	"github.com/appilon/tfplugin/util"
 	"github.com/google/go-github/github"
 	"github.com/mitchellh/cli"
 	"github.com/pkg/browser"
-	"golang.org/x/oauth2"
 )
 
 const CommandName = "upgrade pr"
@@ -74,19 +72,7 @@ func (c *command) Run(args []string) int {
 }
 
 func openPullRequest(providerPath, base, head, user, title string) (*github.PullRequest, error) {
-	token := os.Getenv("GITHUB_PERSONAL_TOKEN")
-	if token == "" {
-		return nil, errors.New("No GITHUB_PERSONAL_TOKEN set")
-	}
-
-	ctx := context.Background()
-	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: token},
-	)
-	tc := oauth2.NewClient(ctx, ts)
-	client := github.NewClient(tc)
-
-	owner, repo, err := getGitHubDetails(providerPath)
+	owner, repo, err := util.GetGitHubDetails(providerPath)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +81,7 @@ func openPullRequest(providerPath, base, head, user, title string) (*github.Pull
 		head = user + ":" + head
 	}
 
-	pr, _, err := client.PullRequests.Create(ctx, owner, repo, &github.NewPullRequest{
+	pr, _, err := svc.Github().PullRequests.Create(context.TODO(), owner, repo, &github.NewPullRequest{
 		Title: github.String(title),
 		Head:  github.String(head),
 		Base:  github.String(base),
@@ -106,13 +92,4 @@ func openPullRequest(providerPath, base, head, user, title string) (*github.Pull
 	os.Stderr.WriteString(fmt.Sprintf("\nPull request created, view at: %s\n", pr.GetHTMLURL()))
 
 	return pr, nil
-}
-
-func getGitHubDetails(providerPath string) (string, string, error) {
-	// format is .../owner/repo
-	parts := strings.Split(providerPath, "/")
-	if len(parts) < 2 {
-		return "", "", fmt.Errorf("%s should follow '.../owner/repo' format", providerPath)
-	}
-	return parts[len(parts)-2], parts[len(parts)-1], nil
 }

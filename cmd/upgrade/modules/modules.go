@@ -34,7 +34,9 @@ func (c *command) Run(args []string) int {
 	var commit bool
 	var message string
 	var removeGovendor bool
+	var propose bool
 	flags.StringVar(&provider, "provider", "", "provider to switch to go modules")
+	flags.BoolVar(&propose, "propose", false, "open issue proposing switch to go modules")
 	flags.BoolVar(&commit, "commit", false, "changes will be committed")
 	flags.StringVar(&message, "message", "deps: use go modules for dep mgmt\nrun go mod tidy\n", "specify commit message")
 	flags.BoolVar(&removeGovendor, "remove-govendor", false, "remove govendor from makefile and travis config")
@@ -44,6 +46,10 @@ func (c *command) Run(args []string) int {
 	if err != nil {
 		log.Printf("Error finding provider: %s", err)
 		return 1
+	}
+
+	if propose {
+		return proposeGoModules(providerPath)
 	}
 
 	if err := util.Run(Env(), providerPath, "go", "mod", "init"); err != nil {

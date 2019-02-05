@@ -48,6 +48,15 @@ func GetPackageName(providerPath string) (string, error) {
 	return providerPath[lastDash+1:], nil
 }
 
+func GetGitHubDetails(providerPath string) (string, string, error) {
+	// format is .../owner/repo
+	parts := strings.Split(providerPath, "/")
+	if len(parts) < 2 {
+		return "", "", fmt.Errorf("%s should follow '.../owner/repo' format", providerPath)
+	}
+	return parts[len(parts)-2], parts[len(parts)-1], nil
+}
+
 func Run(env []string, dir, name string, arg ...string) error {
 	os.Stderr.WriteString(fmt.Sprintf("==> %s %s\n", name, strings.Join(arg, " ")))
 	cmd := exec.Command(name, arg...)
