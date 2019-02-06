@@ -3,7 +3,6 @@
 scripts=$(dirname "$0")
 source "$scripts/skip-providers.sh"
 
-mkdir -p $GOPATH/src/github.com/terraform-providers
 pushd $GOPATH/src/github.com/terraform-providers
 
 echo "provider,go version,uses modules,sdk version" > ./providers.csv
