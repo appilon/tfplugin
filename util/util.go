@@ -11,6 +11,11 @@ import (
 	"strings"
 )
 
+const (
+	providerPrefix    = "terraform-provider-"
+	provisionerPrefix = "terraform-provisioner-"
+)
+
 func FindProvider(providerPath string) (string, error) {
 	if providerPath == "" {
 		return os.Getwd()
@@ -41,11 +46,18 @@ func FindProvider(providerPath string) (string, error) {
 }
 
 func GetPackageName(providerPath string) (string, error) {
-	lastDash := strings.LastIndexByte(providerPath, '-')
-	if lastDash == -1 || len(providerPath) == lastDash+1 {
+	segments := strings.Split(providerPath, "/")
+	last := segments[len(segments)-1]
+	var prefix string
+	if strings.HasPrefix(last, providerPrefix) {
+		prefix = providerPrefix
+	} else if strings.HasPrefix(last, provisionerPrefix) {
+		prefix = provisionerPrefix
+	} else {
 		return "", fmt.Errorf("%s does not follow plugin naming convention terraform-{type}-{name}", providerPath)
 	}
-	return providerPath[lastDash+1:], nil
+
+	return strings.TrimPrefix(last, prefix), nil
 }
 
 func GetGitHubDetails(providerPath string) (string, string, error) {

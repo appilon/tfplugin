@@ -24,7 +24,7 @@ $ GO111MODULE=on go mod vendor
 GO111MODULE=on might be unnecessary depending on your environment, this example will fetch a module @ master and record it in your project's go.mod and go.sum files. It's a good idea to tidy up afterward and then copy the dependencies into vendor/. To remove dependencies from your project, simply remove all usage from your codebase and run:
 
 %%%
-$ GO111MODULE=on go mody tidy
+$ GO111MODULE=on go mod tidy
 $ GO111MODULE=on go mod vendor
 %%%
 

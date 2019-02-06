@@ -6,6 +6,7 @@ import (
 
 	"github.com/appilon/tfplugin/cmd/docs"
 	"github.com/appilon/tfplugin/cmd/schema"
+	"github.com/appilon/tfplugin/cmd/status"
 	"github.com/appilon/tfplugin/cmd/upgrade/golang"
 	"github.com/appilon/tfplugin/cmd/upgrade/modules"
 	"github.com/appilon/tfplugin/cmd/upgrade/pr"
@@ -24,6 +25,7 @@ func main() {
 		sdk.CommandName:     sdk.CommandFactory,
 		modules.CommandName: modules.CommandFactory,
 		pr.CommandName:      pr.CommandFactory,
+		status.CommandName:  status.CommandFactory,
 	}
 
 	exitStatus, err := c.Run()

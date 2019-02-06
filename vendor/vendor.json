@@ -161,6 +161,24 @@
 			"revisionTime": "2018-10-26T10:48:32Z"
 		},
 		{
+			"checksumSHA1": "deL6HNBFDmouiQU+bsXZxHd6oCI=",
+			"path": "github.com/radeksimko/go-mod-diff/go-internal/modfile",
+			"revision": "2f3f326b37d1602d6398a00ddcfb04f8260af35f",
+			"revisionTime": "2019-02-06T23:05:09Z"
+		},
+		{
+			"checksumSHA1": "iiPKQeAwd+4A7aQSilydWMsHKCA=",
+			"path": "github.com/radeksimko/go-mod-diff/go-internal/module",
+			"revision": "2f3f326b37d1602d6398a00ddcfb04f8260af35f",
+			"revisionTime": "2019-02-06T23:05:09Z"
+		},
+		{
+			"checksumSHA1": "Fu7my/ywThtOJCauw2m4qXb1xrw=",
+			"path": "github.com/radeksimko/go-mod-diff/go-internal/semver",
+			"revision": "2f3f326b37d1602d6398a00ddcfb04f8260af35f",
+			"revisionTime": "2019-02-06T23:05:09Z"
+		},
+		{
 			"checksumSHA1": "wRLo86qqt/7IwI8X43IjXLvveU0=",
 			"path": "golang.org/x/net/context",
 			"revision": "03003ca0c849e57b6ea29a4bab8d3cb6e4d568fe",

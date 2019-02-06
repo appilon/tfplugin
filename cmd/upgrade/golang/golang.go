@@ -64,7 +64,7 @@ func (c *command) Run(args []string) int {
 			return 1
 		}
 	} else {
-		from, err = detectGoVersionFromTravis(providerPath)
+		from, err = DetectGoVersionFromTravis(providerPath)
 		if err != nil {
 			log.Printf("Could not detect go version from .travis.yml: %s", err)
 			return 1
@@ -153,7 +153,7 @@ func updateReadme(providerPath string, from, to *version.Version) error {
 	return ioutil.WriteFile(filename, []byte(out), 0644)
 }
 
-func detectGoVersionFromTravis(providerPath string) (*version.Version, error) {
+func DetectGoVersionFromTravis(providerPath string) (*version.Version, error) {
 	_, content, err := util.ReadOneOf(providerPath, ".travis.yml", ".travis.yaml")
 	if err != nil {
 		return nil, err
