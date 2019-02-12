@@ -15,8 +15,8 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/radeksimko/go-mod-diff/go-internal/module"
-	"github.com/radeksimko/go-mod-diff/go-internal/semver"
+	"github.com/radeksimko/go-mod-diff/go-src/cmd/go/_internal/module"
+	"github.com/radeksimko/go-mod-diff/go-src/cmd/go/_internal/semver"
 )
 
 // A File is the parsed, interpreted form of a go.mod file.
