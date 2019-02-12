@@ -24,7 +24,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/radeksimko/go-mod-diff/go-internal/semver"
+	"github.com/radeksimko/go-mod-diff/go-src/cmd/go/_internal/semver"
 )
 
 // A Version is defined by a module path and version pair.

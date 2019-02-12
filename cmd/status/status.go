@@ -11,7 +11,7 @@ import (
 	"github.com/appilon/tfplugin/cmd/upgrade/golang"
 	"github.com/appilon/tfplugin/util"
 	"github.com/mitchellh/cli"
-	"github.com/radeksimko/go-mod-diff/go-internal/modfile"
+	"github.com/radeksimko/go-mod-diff/go-src/cmd/go/_internal/modfile"
 )
 
 const CommandName = "status"
