@@ -41,13 +41,15 @@ func (c *command) Run(args []string) int {
 	var message string
 	var fmt bool
 	var fix bool
+	var encode bool
 	flags.StringVar(&fromStr, "from", "", "current version of go")
 	flags.StringVar(&toStr, "to", strings.TrimPrefix(runtime.Version(), "go"), "version of go upgrading to")
 	flags.StringVar(&provider, "provider", "", "provider to upgrade")
 	flags.BoolVar(&commit, "commit", false, "changes will be committed")
 	flags.StringVar(&message, "message", "", "specify commit message")
-	flags.BoolVar(&fmt, "fmt", false, "Run go fmt on provider")
-	flags.BoolVar(&fix, "fix", false, "Run go fix on provider")
+	flags.BoolVar(&fmt, "fmt", false, "run go fmt on provider")
+	flags.BoolVar(&fix, "fix", false, "run go fix on provider")
+	flags.BoolVar(&encode, "encode", false, "encode version of go to .go-version")
 	flags.Parse(args)
 
 	providerPath, err := util.FindProvider(provider)
@@ -87,6 +89,13 @@ func (c *command) Run(args []string) int {
 		return 1
 	}
 
+	if encode {
+		if err := ioutil.WriteFile(filepath.Join(providerPath, ".go-version"), []byte(to.String()), 0644); err != nil {
+			log.Printf("Error writing %q to .go-version", to)
+			return 1
+		}
+	}
+
 	if fmt || fix {
 		packageName, err := util.GetPackageName(providerPath)
 		if err != nil {
@@ -116,12 +125,15 @@ func (c *command) Run(args []string) int {
 		}
 
 		if message == "" {
-			message = "provider: Require Go " + majorMinor(to) + " in TravisCI and README\n"
+			message = "provider: Ensured Go " + majorMinor(to) + " in TravisCI and README\n"
 			if fix {
 				message += "provider: Run go fix\n"
 			}
 			if fmt {
 				message += "provider: Run go fmt\n"
+			}
+			if encode {
+				message += "provider: Encode go version " + to.String() + "to .go-version file\n"
 			}
 		}
 
@@ -194,26 +206,6 @@ func updateTravis(providerPath string, to *version.Version) error {
 	}
 
 	lines = util.SetLine(lines, goLine+1, fmt.Sprintf(`  - "%s.x"`, majorMinor(to)))
-
-	/* TODO restore something similar in 'upgrade modules'
-
-	if to.Compare(Go111) >= 0 && util.SearchLines(lines, "GO111MODULE=off", 0) == -1 {
-		envLine := util.SearchLines(lines, "env:", 0)
-		if envLine == -1 {
-			last := len(lines) - 1
-			lines = util.InsertLineBefore(lines, last, "env:")
-			envLine = util.SearchLines(lines, "env:", last)
-		}
-
-		globalLine := util.SearchLines(lines, "global:", envLine)
-		if globalLine == -1 {
-			lines = util.InsertLineBefore(lines, envLine+1, "  - GO111MODULE=off")
-		} else {
-			lines = util.InsertLineBefore(lines, globalLine+1, "    - GO111MODULE=off")
-		}
-	}
-
-	*/
 
 	return ioutil.WriteFile(filename, []byte(strings.Join(lines, "\n")), 0644)
 }
