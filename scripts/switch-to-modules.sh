@@ -14,4 +14,3 @@ tfplugin upgrade modules -commit
 tfplugin upgrade pr -branch="$(git rev-parse --abbrev-ref HEAD)" -title="[MODULES] Switch to Go Modules"
 
 popd
-
