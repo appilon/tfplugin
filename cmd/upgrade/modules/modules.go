@@ -210,7 +210,9 @@ func removeGovendorFromMakefile(providerPath string) error {
 		lines = util.DeleteLines(lines, vendorStatusTargetLine, vendorStatusTargetLine+1)
 	}
 
-	out := strings.Replace(strings.Join(lines, "\n"), " vendor-status ", " ", -1)
+	out := strings.Join(lines, "\n")
+	out = strings.Replace(out, " vendor-status ", " ", -1)
+	out = strings.Replace(out, " vendor-status", "", -1)
 
 	return ioutil.WriteFile(filename, []byte(out), 0644)
 }
