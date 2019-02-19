@@ -90,7 +90,7 @@ func (c *command) Run(args []string) int {
 	}
 
 	if encode {
-		if err := ioutil.WriteFile(filepath.Join(providerPath, ".go-version"), []byte(to.String()), 0644); err != nil {
+		if err := ioutil.WriteFile(filepath.Join(providerPath, ".go-version"), []byte(to.String()+"\n"), 0644); err != nil {
 			log.Printf("Error writing %q to .go-version", to)
 			return 1
 		}
