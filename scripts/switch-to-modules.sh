@@ -12,7 +12,7 @@ git checkout -b "go-modules-$(date +%F)"
 tfplugin upgrade go -to="1.11.5" -fix -fmt -encode -commit
 tfplugin upgrade modules -commit
 # upgrade to v0.11.12 which has a clean transitive dependency story that uses go modules
-# tfplugin ugprade sdk -to=v0.11.12 -commit
+tfplugin ugprade sdk -to=sdk-v0.11-with-go-modules -commit
 tfplugin upgrade pr -branch="$(git rev-parse --abbrev-ref HEAD)" -title="[MODULES] Switch to Go Modules"
 
 popd
