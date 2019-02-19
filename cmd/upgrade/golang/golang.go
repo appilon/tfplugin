@@ -133,7 +133,7 @@ func (c *command) Run(args []string) int {
 				message += "provider: Run go fmt\n"
 			}
 			if encode {
-				message += "provider: Encode go version " + to.String() + "to .go-version file\n"
+				message += "provider: Encode go version " + to.String() + " to .go-version file\n"
 			}
 		}
 
