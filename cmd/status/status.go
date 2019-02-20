@@ -33,8 +33,14 @@ func CommandFactory() (cli.Command, error) {
 func (c *command) Run(args []string) int {
 	flags := flag.NewFlagSet(CommandName, flag.ExitOnError)
 	var provider string
+	var readyForModules bool
 	flags.StringVar(&provider, "provider", "", "provider to analyze")
+	flags.BoolVar(&readyForModules, "ready-for-modules", false, "Gather list of providers ready for modules from GitHub")
 	flags.Parse(args)
+
+	if readyForModules {
+		return listReadyProviders()
+	}
 
 	providerPath, err := util.FindProvider(provider)
 	if err != nil {
