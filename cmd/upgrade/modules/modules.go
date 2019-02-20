@@ -55,7 +55,7 @@ func (c *command) Run(args []string) int {
 	// check if repo already uses modules
 	if _, err := os.Stat(filepath.Join(providerPath, "go.mod")); err == nil {
 		log.Printf("Provider is already on go modules")
-		return 0
+		return 1
 	}
 
 	// check if modules PR is currently open
@@ -67,7 +67,7 @@ func (c *command) Run(args []string) int {
 		return 1
 	} else if prNo > 0 {
 		log.Printf("Provider already has modules pull request: https://github.com/%s/%s/pulls/%d", owner, repo, prNo)
-		return 0
+		return 1
 	}
 
 	// switch to modules
