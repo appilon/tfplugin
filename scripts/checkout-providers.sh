@@ -14,7 +14,7 @@ for git_uri in $(cat repos.json | jq -r '.[] | select( .archived == false ) | .s
     skip=$(skip_provider "$repo_dir")
     if [[ ! -d $repo_dir ]] && [[ -z "$skip" ]]
     then
-        git clone --depth 1 $git_uri
+        git clone --depth 1 --no-single-branch $git_uri
     fi
 done
 
