@@ -68,7 +68,7 @@ func (c *command) Run(args []string) int {
 			case "dep":
 				// TODO
 			case "modules":
-				command = "go get " + TerraformRepo + "@" + to + "and go mod tidy"
+				command = "go get " + TerraformRepo + "@" + to + " and go mod tidy"
 			}
 
 			message = fmt.Sprintf("deps: %s@%s\nUpdated via: %s\n", TerraformRepo, to, command)
