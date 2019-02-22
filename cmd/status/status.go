@@ -34,12 +34,18 @@ func (c *command) Run(args []string) int {
 	flags := flag.NewFlagSet(CommandName, flag.ExitOnError)
 	var provider string
 	var readyForModules bool
+	var noResponseForModules bool
 	flags.StringVar(&provider, "provider", "", "provider to analyze")
 	flags.BoolVar(&readyForModules, "ready-for-modules", false, "Gather list of providers ready for modules from GitHub")
+	flags.BoolVar(&noResponseForModules, "no-response-for-modules", false, "Gather list of providers with no votes for modules from GitHub")
 	flags.Parse(args)
 
 	if readyForModules {
 		return listReadyProviders()
+	}
+
+	if noResponseForModules {
+		return listNoResponseProviders()
 	}
 
 	providerPath, err := util.FindProvider(provider)

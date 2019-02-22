@@ -12,19 +12,55 @@ import (
 	"github.com/google/go-github/github"
 )
 
+func listNoResponseProviders() int {
+	return forEachModuleProposal(func(issue *github.Issue) {
+		owner, repo, err := util.GetGitHubDetails(issue.GetRepositoryURL())
+		if err != nil {
+			log.Printf("Error getting gh details: %s", err)
+		}
+		upvotes, downvotes, err := getUpvotesDownvotes(owner, repo, issue.GetNumber())
+		if err != nil {
+			log.Printf("Error counting upvotes/downvotes: %s", err)
+			return
+		}
+		if upvotes == 0 && downvotes == 0 {
+			fmt.Printf("github.com/%s/%s", owner, repo)
+			fmt.Println()
+		}
+	})
+}
+
 func listReadyProviders() int {
+	return forEachModuleProposal(func(issue *github.Issue) {
+		owner, repo, err := util.GetGitHubDetails(issue.GetRepositoryURL())
+		if err != nil {
+			log.Printf("Error getting gh details: %s", err)
+		}
+		upvotes, downvotes, err := getUpvotesDownvotes(owner, repo, issue.GetNumber())
+		if err != nil {
+			log.Printf("Error counting upvotes/downvotes: %s", err)
+			return
+		}
+		if upvotes > downvotes {
+			fmt.Printf("github.com/%s/%s", owner, repo)
+			fmt.Println()
+		}
+	})
+}
+
+func forEachModuleProposal(do func(*github.Issue)) int {
 	opt := &github.SearchOptions{
 		ListOptions: github.ListOptions{PerPage: 200},
 	}
 	q := fmt.Sprintf(`org:terraform-providers "%s" in:title is:issue is:open`, modules.IssueTitle)
 	for {
 		res, resp, err := svc.Github().Search.Issues(context.TODO(), q, opt)
-		for i := range res.Issues {
-			printIfUpvoted(&res.Issues[i])
-		}
 		if err != nil {
 			log.Printf("Error searching for issues: %s", err)
 			return 1
+		}
+		for i := range res.Issues {
+			do(&res.Issues[i])
 		}
 		if resp.NextPage == 0 {
 			break
@@ -34,28 +70,11 @@ func listReadyProviders() int {
 	return 0
 }
 
-func printIfUpvoted(issue *github.Issue) {
-	var upvotes int
-	var downvotes int
-
-	owner, repo, err := util.GetGitHubDetails(issue.GetRepositoryURL())
-	if err != nil {
-		log.Printf("Error parsing owner/repo: %s", err)
-		return
-	}
-	id := issue.GetNumber()
-
-	defer func() {
-		if upvotes > downvotes {
-			fmt.Printf("github.com/%s/%s", owner, repo)
-			fmt.Println()
-		}
-	}()
-
+func getUpvotesDownvotes(owner string, repo string, id int) (upvotes int, downvotes int, err error) {
 	// issues returned from search aren't fully populated
+	var issue *github.Issue
 	issue, _, err = svc.Github().Issues.Get(context.TODO(), owner, repo, id)
 	if err != nil {
-		log.Printf("Error fully fetching %s/%s/%d: %s", owner, repo, id, err)
 		return
 	}
 
@@ -69,7 +88,9 @@ func printIfUpvoted(issue *github.Issue) {
 	}
 
 	for {
-		comments, resp, err := svc.Github().Issues.ListComments(context.TODO(), owner, repo, issue.GetNumber(), opt)
+		var comments []*github.IssueComment
+		var resp *github.Response
+		comments, resp, err = svc.Github().Issues.ListComments(context.TODO(), owner, repo, issue.GetNumber(), opt)
 		for _, comment := range comments {
 			// strip quoted text to avoid the original issue message from counting as an upvote or downvote
 			msg := removeQuotedText(comment.GetBody())
@@ -83,7 +104,6 @@ func printIfUpvoted(issue *github.Issue) {
 			}
 		}
 		if err != nil {
-			log.Printf("Error fetching comments for %s/%s/%d: %s", owner, repo, issue.GetNumber(), err)
 			return
 		}
 		if resp.NextPage == 0 {
@@ -91,6 +111,7 @@ func printIfUpvoted(issue *github.Issue) {
 		}
 		opt.Page = resp.NextPage
 	}
+	return
 }
 
 func removeQuotedText(body string) string {
