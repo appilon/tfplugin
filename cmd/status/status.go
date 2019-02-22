@@ -35,9 +35,11 @@ func (c *command) Run(args []string) int {
 	var provider string
 	var readyForModules bool
 	var noResponseForModules bool
+	var proposal bool
 	flags.StringVar(&provider, "provider", "", "provider to analyze")
 	flags.BoolVar(&readyForModules, "ready-for-modules", false, "Gather list of providers ready for modules from GitHub")
 	flags.BoolVar(&noResponseForModules, "no-response-for-modules", false, "Gather list of providers with no votes for modules from GitHub")
+	flags.BoolVar(&proposal, "proposal", false, "Retrieve issue number proposing modules")
 	flags.Parse(args)
 
 	if readyForModules {
@@ -52,6 +54,10 @@ func (c *command) Run(args []string) int {
 	if err != nil {
 		log.Printf("Error finding provider: %s", err)
 		return 1
+	}
+
+	if proposal {
+		return printProposalIssue(providerPath)
 	}
 
 	providerName, err := util.GetPackageName(providerPath)

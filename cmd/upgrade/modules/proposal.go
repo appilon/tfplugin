@@ -42,7 +42,7 @@ func proposeGoModules(providerPath string) int {
 		return 1
 	}
 
-	if issueNo, err := issueExists(owner, repo, IssueTitle); err != nil {
+	if issueNo, err := IssueExists(owner, repo, IssueTitle); err != nil {
 		log.Printf("Error searching for GH issue w/ title %q: %s", IssueTitle, err)
 		return 1
 	} else if issueNo > 0 {
@@ -89,7 +89,7 @@ func pullRequestExists(owner, repo, title string) (int, error) {
 	return 0, nil
 }
 
-func issueExists(owner, repo, title string) (int, error) {
+func IssueExists(owner, repo, title string) (int, error) {
 	opt := &github.IssueListByRepoOptions{
 		ListOptions: github.ListOptions{PerPage: 100},
 		State:       "open",

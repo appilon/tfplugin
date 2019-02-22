@@ -77,6 +77,16 @@ func (c *command) Run(args []string) int {
 		return 1
 	}
 
+	if err := os.RemoveAll(filepath.Join(providerPath, "Gopkg.lock")); err != nil {
+		log.Printf("Error deleting Gopkg.lock: %s", err)
+		return 1
+	}
+
+	if err := os.RemoveAll(filepath.Join(providerPath, "Gopkg.toml")); err != nil {
+		log.Printf("Error deleting Gopkg.toml: %s", err)
+		return 1
+	}
+
 	if err := os.RemoveAll(filepath.Join(providerPath, "vendor")); err != nil {
 		log.Printf("Error purging vendor/ from %s: %s", providerPath, err)
 		return 1

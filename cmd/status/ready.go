@@ -12,6 +12,21 @@ import (
 	"github.com/google/go-github/github"
 )
 
+func printProposalIssue(providerPath string) int {
+	owner, repo, err := util.GetGitHubDetails(providerPath)
+	if err != nil {
+		log.Printf("Error getting gh details: %s", err)
+		return 1
+	}
+	issueNo, err := modules.IssueExists(owner, repo, modules.IssueTitle)
+	if err != nil {
+		log.Printf("Error searching for proposal issue: %s", err)
+		return 1
+	}
+	fmt.Print(issueNo)
+	return 0
+}
+
 func listNoResponseProviders() int {
 	return forEachModuleProposal(func(issue *github.Issue) {
 		owner, repo, err := util.GetGitHubDetails(issue.GetRepositoryURL())

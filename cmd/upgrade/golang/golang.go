@@ -34,7 +34,6 @@ func CommandFactory() (cli.Command, error) {
 
 func (c *command) Run(args []string) int {
 	flags := flag.NewFlagSet(CommandName, flag.ExitOnError)
-	var fromStr string
 	var toStr string
 	var provider string
 	var commit bool
@@ -42,7 +41,6 @@ func (c *command) Run(args []string) int {
 	var fmt bool
 	var fix bool
 	var encode bool
-	flags.StringVar(&fromStr, "from", "", "current version of go")
 	flags.StringVar(&toStr, "to", strings.TrimPrefix(runtime.Version(), "go"), "version of go upgrading to")
 	flags.StringVar(&provider, "provider", "", "provider to upgrade")
 	flags.BoolVar(&commit, "commit", false, "changes will be committed")
@@ -58,33 +56,27 @@ func (c *command) Run(args []string) int {
 		return 1
 	}
 
-	var from *version.Version
-	if fromStr != "" {
-		from, err = version.NewVersion(fromStr)
-		if err != nil {
-			log.Printf("Error parsing -from: %s", err)
-			return 1
-		}
-	} else {
-		from, err = DetectGoVersionFromTravis(providerPath)
-		if err != nil {
-			log.Printf("Could not detect go version from .travis.yml: %s", err)
-			return 1
-		}
-	}
-
 	to, err := version.NewVersion(toStr)
 	if err != nil {
 		log.Printf("Error parsing -to: %s", err)
 		return 1
 	}
 
-	if err := updateTravis(providerPath, to); err != nil {
+	if err := updateTravis(providerPath, majorMinor(to)); err != nil {
 		log.Printf("Error updating .travis.yml: %s", err)
 		return 1
 	}
 
-	if err := updateReadme(providerPath, from, to); err != nil {
+	// update all known versions found in readmes
+	if err := updateReadme(providerPath, "1.8", majorMinor(to)); err != nil {
+		log.Printf("Error updating README.md: %s", err)
+		return 1
+	}
+	if err := updateReadme(providerPath, "1.9", majorMinor(to)); err != nil {
+		log.Printf("Error updating README.md: %s", err)
+		return 1
+	}
+	if err := updateReadme(providerPath, "1.10", majorMinor(to)); err != nil {
 		log.Printf("Error updating README.md: %s", err)
 		return 1
 	}
@@ -151,10 +143,7 @@ func majorMinor(v *version.Version) string {
 	return fmt.Sprintf("%d.%d", segments[0], segments[1])
 }
 
-func updateReadme(providerPath string, from, to *version.Version) error {
-	search := majorMinor(from)
-	replace := majorMinor(to)
-
+func updateReadme(providerPath string, search string, replace string) error {
 	filename := filepath.Join(providerPath, "README.md")
 	content, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -188,7 +177,7 @@ func DetectGoVersionFromTravis(providerPath string) (*version.Version, error) {
 	return version.NewVersion(v)
 }
 
-func updateTravis(providerPath string, to *version.Version) error {
+func updateTravis(providerPath string, to string) error {
 	filename, content, err := util.ReadOneOf(providerPath, ".travis.yml", ".travis.yaml")
 	if err != nil {
 		return err
@@ -205,7 +194,7 @@ func updateTravis(providerPath string, to *version.Version) error {
 		return errors.New("no 'go:' in travis config")
 	}
 
-	lines = util.SetLine(lines, goLine+1, fmt.Sprintf(`  - "%s.x"`, majorMinor(to)))
+	lines = util.SetLine(lines, goLine+1, fmt.Sprintf(`  - "%s.x"`, to))
 
 	return ioutil.WriteFile(filename, []byte(strings.Join(lines, "\n")), 0644)
 }

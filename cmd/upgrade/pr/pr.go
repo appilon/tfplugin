@@ -38,6 +38,7 @@ func (c *command) Run(args []string) int {
 	var base string
 	var user string
 	var title string
+	var closes int
 	var provider string
 	flags.StringVar(&branch, "branch", "", "name of branch to pull request")
 	flags.StringVar(&remote, "remote", "origin", "remote to push to")
@@ -45,6 +46,7 @@ func (c *command) Run(args []string) int {
 	flags.StringVar(&base, "base", "master", "base branch to open pull request against")
 	flags.StringVar(&user, "user", "", "github user/org for cross account pull requests")
 	flags.StringVar(&title, "title", "[AUTOMATED] tfplugin pull request", "title of the pull request")
+	flags.IntVar(&closes, "closes", 0, "PR closes issue #")
 	flags.BoolVar(&open, "open", false, "open created pull request in browser")
 	flags.Parse(args)
 
@@ -59,7 +61,11 @@ func (c *command) Run(args []string) int {
 		return 1
 	}
 
-	if pr, err := openPullRequest(providerPath, base, branch, user, title); err != nil {
+	var body string
+	if closes > 0 {
+		body = fmt.Sprintf(`Closes #%d`, closes)
+	}
+	if pr, err := openPullRequest(providerPath, base, branch, user, title, body); err != nil {
 		log.Printf("Error opening pull request: %s", err)
 		return 1
 	} else if open {
@@ -71,7 +77,7 @@ func (c *command) Run(args []string) int {
 	return 0
 }
 
-func openPullRequest(providerPath, base, head, user, title string) (*github.PullRequest, error) {
+func openPullRequest(providerPath, base, head, user, title string, body string) (*github.PullRequest, error) {
 	owner, repo, err := util.GetGitHubDetails(providerPath)
 	if err != nil {
 		return nil, err
@@ -83,6 +89,7 @@ func openPullRequest(providerPath, base, head, user, title string) (*github.Pull
 
 	pr, _, err := svc.Github().PullRequests.Create(context.TODO(), owner, repo, &github.NewPullRequest{
 		Title: github.String(title),
+		Body:  github.String(body),
 		Head:  github.String(head),
 		Base:  github.String(base),
 	})
