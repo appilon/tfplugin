@@ -102,12 +102,12 @@ func (c *command) Run(args []string) int {
 		return 1
 	}
 
-	if err := removeGovendorFromTravis(providerPath); err != nil {
+	if err := removeGovendorDepFromTravis(providerPath); err != nil {
 		log.Printf("Error removing govendor from travis config in %s: %s", providerPath, err)
 		return 1
 	}
 
-	if err := removeGovendorFromMakefile(providerPath); err != nil {
+	if err := removeGovendorDepFromMakefile(providerPath); err != nil {
 		log.Printf("Error removing govendor from makefile in %s: %s", providerPath, err)
 		return 1
 	}
@@ -187,16 +187,22 @@ func turnOffModulesForCertainCommandsInMakefile(providerPath string) error {
 	return ioutil.WriteFile(filename, []byte(strings.Join(lines, "\n")), 0644)
 }
 
-func removeGovendorFromTravis(providerPath string) error {
+func removeLineContaining(lines []string, search string) []string {
+	if l := util.SearchLines(lines, search, 0); l > -1 {
+		lines = util.DeleteLines(lines, l)
+	}
+	return lines
+}
+
+func removeGovendorDepFromTravis(providerPath string) error {
 	filename, content, err := util.ReadOneOf(providerPath, ".travis.yml", ".travis.yaml")
 	if err != nil {
 		return err
 	}
 	lines := strings.Split(string(content), "\n")
 
-	if goGetLine := util.SearchLines(lines, "github.com/kardianos/govendor", 0); goGetLine > -1 {
-		lines = util.DeleteLines(lines, goGetLine)
-	}
+	lines = removeLineContaining(lines, "github.com/kardianos/govendor")
+	lines = removeLineContaining(lines, "github.com/golang/dep/cmd/dep")
 
 	if vendorStatusLine := util.SearchLines(lines, "vendor-status", 0); vendorStatusLine > -1 {
 		lines = util.DeleteLines(lines, vendorStatusLine)
@@ -205,16 +211,15 @@ func removeGovendorFromTravis(providerPath string) error {
 	return ioutil.WriteFile(filename, []byte(strings.Join(lines, "\n")), 0644)
 }
 
-func removeGovendorFromMakefile(providerPath string) error {
+func removeGovendorDepFromMakefile(providerPath string) error {
 	filename, content, err := util.ReadOneOf(providerPath, "Makefile", "GNUmakefile")
 	if err != nil {
 		return err
 	}
 	lines := strings.Split(string(content), "\n")
 
-	if goGetLine := util.SearchLines(lines, "github.com/kardianos/govendor", 0); goGetLine > -1 {
-		lines = util.DeleteLines(lines, goGetLine)
-	}
+	lines = removeLineContaining(lines, "github.com/kardianos/govendor")
+	lines = removeLineContaining(lines, "github.com/golang/dep/cmd/dep")
 
 	if vendorStatusTargetLine := util.SearchLines(lines, "vendor-status:", 0); vendorStatusTargetLine > -1 {
 		lines = util.DeleteLines(lines, vendorStatusTargetLine, vendorStatusTargetLine+1)

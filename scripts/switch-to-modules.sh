@@ -17,7 +17,7 @@ pushd $GOPATH/src/$1
 
 git checkout -f master
 git pull
-git branch -D "go-modules-$(date +%F)"
+git branch -D "go-modules-$(date +%F)" || true
 git checkout -b "go-modules-$(date +%F)"
 # this is mainly to encode the .go-version, will create commit message
 # stating it did a few things that are likely noop
