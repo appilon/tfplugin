@@ -33,6 +33,14 @@ func listNoResponseProviders() int {
 		if err != nil {
 			log.Printf("Error getting gh details: %s", err)
 		}
+		// skip providers with open PRs
+		if prNo, err := modules.PullRequestExists(owner, repo, "modules"); err != nil {
+			log.Printf("github.com/%s/%s: error searching pull requests: %s", owner, repo, err)
+			return
+		} else if prNo > 0 {
+			log.Printf("github.com/%s/%s: already has an open PR", owner, repo)
+			return
+		}
 		upvotes, downvotes, err := getUpvotesDownvotes(owner, repo, issue.GetNumber())
 		if err != nil {
 			log.Printf("Error counting upvotes/downvotes: %s", err)
@@ -50,6 +58,14 @@ func listReadyProviders() int {
 		owner, repo, err := util.GetGitHubDetails(issue.GetRepositoryURL())
 		if err != nil {
 			log.Printf("Error getting gh details: %s", err)
+		}
+		// skip providers with open PRs
+		if prNo, err := modules.PullRequestExists(owner, repo, "modules"); err != nil {
+			log.Printf("github.com/%s/%s: error searching pull requests: %s", owner, repo, err)
+			return
+		} else if prNo > 0 {
+			log.Printf("github.com/%s/%s: already has an open PR", owner, repo)
+			return
 		}
 		upvotes, downvotes, err := getUpvotesDownvotes(owner, repo, issue.GetNumber())
 		if err != nil {

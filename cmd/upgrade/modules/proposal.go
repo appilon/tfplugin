@@ -13,6 +13,7 @@ import (
 )
 
 const IssueTitle = "[PROPOSAL] Switch to Go Modules"
+const PullRequestTitle = "[MODULES] Switch to Go Modules"
 const issueBody = `As part of the preparation for Terraform v0.12, we would like to migrate all providers to use [Go Modules](https://github.com/golang/go/wiki/Modules). We plan to continue checking dependencies into vendor/ to remain compatible with existing tooling/CI for a period of time, however go modules will be used for management. Go Modules is the official solution for the go programming language, we understand some providers might not want this change yet, however we encourage providers to begin looking towards the switch as this is how we will be managing all Go projects in the future. Would maintainers please react with :+1: for support, or :-1: if you wish to have this provider omitted from the first wave of pull requests. If your provider is in support, we would ask that you avoid merging any pull requests that mutate the dependencies while the Go Modules PR is open (in fact a total codefreeze would be even more helpful), otherwise we will need to close that PR and re-run %go mod init%. Once merged, dependencies can be added or updated as follows:
 
 %%%
@@ -62,7 +63,7 @@ func proposeGoModules(providerPath string) int {
 	return 0
 }
 
-func pullRequestExists(owner, repo, title string) (int, error) {
+func PullRequestExists(owner, repo, title string) (int, error) {
 	opt := &github.PullRequestListOptions{
 		ListOptions: github.ListOptions{PerPage: 100},
 		State:       "open",
@@ -75,7 +76,7 @@ func pullRequestExists(owner, repo, title string) (int, error) {
 		}
 
 		for _, pr := range prs {
-			if strings.Contains(pr.GetTitle(), title) {
+			if strings.Contains(strings.ToLower(pr.GetTitle()), strings.ToLower(title)) {
 				return pr.GetNumber(), nil
 			}
 		}
@@ -102,7 +103,7 @@ func IssueExists(owner, repo, title string) (int, error) {
 		}
 
 		for _, issue := range issues {
-			if strings.Contains(issue.GetTitle(), title) {
+			if strings.Contains(strings.ToLower(issue.GetTitle()), strings.ToLower(title)) {
 				return issue.GetNumber(), nil
 			}
 		}

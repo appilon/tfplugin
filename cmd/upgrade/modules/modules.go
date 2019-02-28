@@ -62,7 +62,7 @@ func (c *command) Run(args []string) int {
 	if owner, repo, err := util.GetGitHubDetails(providerPath); err != nil {
 		log.Printf("Error getting owner/repo info: %s", err)
 		return 1
-	} else if prNo, err := pullRequestExists(owner, repo, "[MODULES]"); err != nil {
+	} else if prNo, err := PullRequestExists(owner, repo, "[MODULES]"); err != nil {
 		log.Printf("Error looking up pull requests for %s/%s: %s", owner, repo, err)
 		return 1
 	} else if prNo > 0 {
