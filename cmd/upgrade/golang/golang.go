@@ -171,7 +171,8 @@ func DetectGoVersionFromTravis(providerPath string) (*version.Version, error) {
 		return nil, errors.New("no 'go:' in travis config")
 	}
 
-	v := strings.TrimLeft(lines[goLine+1], ` -"`)
+	v := strings.TrimSpace(lines[goLine+1])
+	v = strings.TrimLeft(v, ` -"`)
 	v = strings.TrimRight(v, ` "x.`)
 
 	return version.NewVersion(v)
