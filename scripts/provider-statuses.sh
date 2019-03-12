@@ -5,7 +5,7 @@ source "$scripts/skip-providers.sh"
 
 pushd $GOPATH/src/github.com/terraform-providers
 
-echo "provider,go version,uses modules,sdk version" > ./providers.csv
+echo "provider,go_version,uses_modules,sdk_version" > ./providers.csv
 
 for git_uri in $(cat repos.json | jq -r '.[] | select( .archived == false ) | .ssh_url'); do
     repo_dir=$(basename $git_uri .git)
