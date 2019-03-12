@@ -27,8 +27,8 @@ func printProposalIssue(providerPath string) int {
 	return 0
 }
 
-func listNoResponseProviders() int {
-	return forEachModuleProposal(func(issue *github.Issue) {
+func compareVotes(compare func(int, int) bool) func(*github.Issue) {
+	return func(issue *github.Issue) {
 		owner, repo, err := util.GetGitHubDetails(issue.GetRepositoryURL())
 		if err != nil {
 			log.Printf("Error getting gh details: %s", err)
@@ -46,37 +46,29 @@ func listNoResponseProviders() int {
 			log.Printf("Error counting upvotes/downvotes: %s", err)
 			return
 		}
-		if upvotes == 0 && downvotes == 0 {
+		if compare(upvotes, downvotes) {
 			fmt.Printf("github.com/%s/%s", owner, repo)
 			fmt.Println()
 		}
-	})
+	}
+}
+
+func listNotReadyProviders() int {
+	return forEachModuleProposal(compareVotes(func(upvotes, downvotes int) bool {
+		return downvotes >= upvotes && downvotes > 0
+	}))
+}
+
+func listNoResponseProviders() int {
+	return forEachModuleProposal(compareVotes(func(upvotes, downvotes int) bool {
+		return upvotes == 0 && downvotes == 0
+	}))
 }
 
 func listReadyProviders() int {
-	return forEachModuleProposal(func(issue *github.Issue) {
-		owner, repo, err := util.GetGitHubDetails(issue.GetRepositoryURL())
-		if err != nil {
-			log.Printf("Error getting gh details: %s", err)
-		}
-		// skip providers with open PRs
-		if prNo, err := modules.PullRequestExists(owner, repo, "modules"); err != nil {
-			log.Printf("github.com/%s/%s: error searching pull requests: %s", owner, repo, err)
-			return
-		} else if prNo > 0 {
-			log.Printf("github.com/%s/%s: already has an open PR", owner, repo)
-			return
-		}
-		upvotes, downvotes, err := getUpvotesDownvotes(owner, repo, issue.GetNumber())
-		if err != nil {
-			log.Printf("Error counting upvotes/downvotes: %s", err)
-			return
-		}
-		if upvotes > downvotes {
-			fmt.Printf("github.com/%s/%s", owner, repo)
-			fmt.Println()
-		}
-	})
+	return forEachModuleProposal(compareVotes(func(upvotes, downvotes int) bool {
+		return upvotes > downvotes
+	}))
 }
 
 func forEachModuleProposal(do func(*github.Issue)) int {
