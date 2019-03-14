@@ -175,11 +175,11 @@ func turnOffModulesForCertainCommandsInMakefile(providerPath string) error {
 	lines := strings.Split(string(content), "\n")
 
 	// disable modules for commands known to not work in module mode
-	for _, line := range lines {
+	for i, line := range lines {
 		for _, command := range disableGoModulesFor {
 			index := strings.Index(line, command)
 			if index > -1 && !strings.Contains(line[:index], "GO111MODULE=off") {
-				line = line[:index] + "GO111MODULE=off " + line[index:]
+				lines[i] = line[:index] + "GO111MODULE=off " + line[index:]
 			}
 		}
 	}
