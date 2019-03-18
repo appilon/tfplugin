@@ -62,9 +62,11 @@ func (c *command) Run(args []string) int {
 		return 1
 	}
 
-	if err := updateTravis(providerPath, majorMinor(to)); err != nil {
+	if err := updateTravis(providerPath, majorMinor(to)); !os.IsNotExist(err) {
 		log.Printf("Error updating .travis.yml: %s", err)
 		return 1
+	} else if err != nil {
+		log.Printf("No travis file, skipping...")
 	}
 
 	// update all known versions found in readmes
