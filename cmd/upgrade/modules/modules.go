@@ -102,7 +102,7 @@ func (c *command) Run(args []string) int {
 		return 1
 	}
 
-	if err := removeGovendorDepFromTravis(providerPath); !os.IsNotExist(err) {
+	if err := removeGovendorDepFromTravis(providerPath); err != nil && !os.IsNotExist(err) {
 		log.Printf("Error removing govendor from travis config in %s: %s", providerPath, err)
 		return 1
 	} else if err != nil {
@@ -114,7 +114,7 @@ func (c *command) Run(args []string) int {
 		return 1
 	}
 
-	if err := setModulesEnvVarsInTravis(providerPath); !os.IsNotExist(err) {
+	if err := setModulesEnvVarsInTravis(providerPath); err != nil && !os.IsNotExist(err) {
 		log.Printf("Error setting module related env vars in travis file %s: %s", providerPath, err)
 		return 1
 	} else if err != nil {

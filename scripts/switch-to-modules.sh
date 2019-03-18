@@ -26,6 +26,6 @@ tfplugin upgrade go -to="1.11.5" -fix -fmt -encode -commit
 tfplugin upgrade modules -commit
 # upgrade to v0.11 sdk which has a clean transitive dependency story that uses go modules
 tfplugin upgrade sdk -to=sdk-v0.11-with-go-modules -commit
-#tfplugin upgrade pr -closes="$(tfplugin status -proposal)" -branch="$(git rev-parse --abbrev-ref HEAD)" -title="[MODULES] Switch to Go Modules"
+tfplugin upgrade pr -closes="$(tfplugin status -proposal)" -branch="$(git rev-parse --abbrev-ref HEAD)" -title="[MODULES] Re-open Switch to Go Modules"
 
 popd
