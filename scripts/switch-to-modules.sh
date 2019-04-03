@@ -22,7 +22,7 @@ git checkout -b "go-modules-$(date +%F)"
 # this is mainly to encode the .go-version, will create commit message
 # stating it did a few things that are likely noop
 # as most PRs have already been merged switching to go 1.11
-tfplugin upgrade go -to="1.11.5" -fix -fmt -encode -commit
+tfplugin upgrade go -to="1.11.6" -fix -fmt -encode -commit
 tfplugin upgrade modules -commit
 # upgrade to v0.11 sdk which has a clean transitive dependency story that uses go modules
 tfplugin upgrade sdk -to=sdk-v0.11-with-go-modules -commit
